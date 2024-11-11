@@ -1,0 +1,2 @@
+1. 1 akun memiliki setup grup pribadi
+2. form screenshoot => link window.href, $('input[role="combobox"]').change attr(aria-expanded="false")

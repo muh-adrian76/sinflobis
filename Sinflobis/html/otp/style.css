@@ -1,0 +1,118 @@
+/* Import Google font - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e77d2b;
+}
+.alert {
+  position: relative;
+  padding: 0.9375rem 0.9375rem;
+  margin-bottom: 1rem;
+  border: 0 solid transparent;
+  border-radius: 0.375rem;
+  text-align: center !important;
+}
+.alert-warning {
+  background-color: #fff2d6;
+  border-color: #ffe6b3;
+  color: #ffab00;
+}
+.alert-dark {
+  background-color: #dcdfe1;
+  border-color: #bdc2c8;
+  color: #233446;
+}
+.alert-secondary {
+  background-color: #ebeef0;
+  border-color: #dadee3;
+  color: #8592a3;
+}
+.alert-success {
+  background-color: #e8fadf;
+  border-color: #d4f5c3;
+  color: #49be0a;
+}
+.center {
+  display: flex;
+  justify-content: center !important;
+}
+:where(.container-otp, form, .input-field, .container-otp header) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.container-otp {
+  background: #fff;
+  padding: 30px 65px;
+  border-radius: 12px;
+  row-gap: 20px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+.container-otp header {
+  height: 65px;
+  width: 65px;
+  background: #ffa94b;
+  color: #fff;
+  font-size: 2.5rem;
+  border-radius: 50%;
+}
+.container-otp h4 {
+  font-size: 1.25rem;
+  color: #333;
+  font-weight: 500;
+}
+.container-otp h6 {
+  font-size: 0.75rem;
+  color: #777;
+  font-weight: 500;
+}
+form.otp .input-field {
+  flex-direction: row;
+  column-gap: 10px;
+}
+.input-field input {
+  height: 45px;
+  width: 42px;
+  border-radius: 6px;
+  outline: none;
+  font-size: 1.125rem;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+.input-field input:focus {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+.input-field input::-webkit-inner-spin-button,
+.input-field input::-webkit-outer-spin-button {
+  display: none;
+}
+form.otp button {
+  margin-top: 25px;
+  width: 100%;
+  color: #fff;
+  font-size: 1rem;
+  border: none;
+  padding: 9px 0;
+  cursor: pointer !important;
+  border-radius: 6px;
+  pointer-events: none;
+  background: #fec76f;
+  transition: all 0.2s ease;
+}
+form.otp button.active {
+  background: #ffa94b;
+  pointer-events: auto;
+}
+form.otp button:hover {
+  background: #e77d2b;
+}
