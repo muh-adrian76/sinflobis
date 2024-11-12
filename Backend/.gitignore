@@ -1,3 +1,4 @@
 node_modules
-migrations
+search-card
+.env
 package-lock.json

@@ -28,12 +28,15 @@ const scrapeGoogleMaps = async (query) => {
   await page.waitForSelector('div[role="main"]', {
     timeout: 10000,
   });
-  const jamSibuk = await page.waitForSelector(
-    'div[aria-label^="Jam favorit di"]',
-    {
+  let jamSibuk;
+  try {
+    jamSibuk = await page.waitForSelector('div[aria-label^="Jam favorit di"]', {
       timeout: 10000,
-    }
-  );
+    });
+  } catch (error) {
+    // Handle the error when the selector is not found
+    // console.error("jamSibuk selector not found:", error);
+  }
   if (!jamSibuk) {
     try {
       // If the popular times div isn't available, search for div[role="feed"] and click the first link
@@ -136,7 +139,7 @@ const scrapeGoogleMaps = async (query) => {
   return { locationData, popularTimesData };
 };
 
-const saveToDatabase = async (locationData, popularTimesData) => {
+const createGroup = async (group_name) => {
   const connection = await mysql.createConnection({
     user: process.env.MYSQL_USER,
     host: process.env.MYSQL_HOST,
@@ -144,7 +147,46 @@ const saveToDatabase = async (locationData, popularTimesData) => {
     password: process.env.MYSQL_PASSWORD,
     port: process.env.MYSQL_PORT,
   });
+  try {
+    await connection.beginTransaction();
+    let groupId = "";
+    if (group_name !== null) {
+      const [existingGroup] = await connection.execute(
+        "SELECT id FROM location_groups WHERE name = ?",
+        [group_name]
+      );
 
+      if (existingGroup.length > 0) {
+        groupId = existingGroup[0].id;
+        console.log(`Grup ${group_name} sudah ada dengan ID: ${groupId}`);
+      } else {
+        const [insertResult] = await connection.execute(
+          "INSERT INTO location_groups (name) VALUES (?)",
+          [group_name]
+        );
+        groupId = insertResult.insertId;
+        console.log(`Berhasil menambahkan grup ${group_name} pada database!`);
+      }
+    }
+    await connection.commit();
+    return groupId;
+  } catch (error) {
+    console.log(`Gagal menambahkan grup ${group_name} pada database!`);
+    await connection.rollback();
+  } finally {
+    // Close the connection
+    await connection.end();
+  }
+};
+
+const saveToDatabase = async (locationData, groupId, popularTimesData) => {
+  const connection = await mysql.createConnection({
+    user: process.env.MYSQL_USER,
+    host: process.env.MYSQL_HOST,
+    database: process.env.MYSQL_DATABASE,
+    password: process.env.MYSQL_PASSWORD,
+    port: process.env.MYSQL_PORT,
+  });
   try {
     await connection.beginTransaction();
 
@@ -158,8 +200,13 @@ const saveToDatabase = async (locationData, popularTimesData) => {
 
     locationData.name = locationData.name.replace(/"/g, "");
     const [locationResult] = await connection.execute(
-      "INSERT INTO locations (name, latitude, longitude) VALUES (?, ?, ?)",
-      [locationData.name, locationData.latitude, locationData.longitude]
+      "INSERT INTO locations (name, grup, latitude, longitude) VALUES (?, ?, ?, ?)",
+      [
+        locationData.name,
+        groupId,
+        locationData.latitude,
+        locationData.longitude,
+      ]
     );
     const locationId = locationResult.insertId;
 
@@ -178,6 +225,8 @@ const saveToDatabase = async (locationData, popularTimesData) => {
     console.log(`Berhasil menyimpan data ${locationData.name} pada database!`);
   } catch (error) {
     // Roll back the transaction on error
+    console.log(`Gagal menyimpan data ${locationData.name} pada database!`);
+
     await connection.rollback();
   } finally {
     // Close the connection
@@ -185,4 +234,4 @@ const saveToDatabase = async (locationData, popularTimesData) => {
   }
 };
 
-module.exports = { scrapeGoogleMaps, saveToDatabase };
+module.exports = { scrapeGoogleMaps, createGroup, saveToDatabase };

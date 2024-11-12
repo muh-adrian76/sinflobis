@@ -52,7 +52,7 @@
   transform-origin: left top;
   border-right: var(--symbol-thickness) solid var(--check-color);
   border-top: var(--symbol-thickness) solid var(--check-color);
-  content: '';
+  content: "";
   left: var(--check-left);
   top: var(--check-height);
   position: absolute;
@@ -91,7 +91,7 @@
   transform-origin: left top;
   border-right: var(--symbol-thickness) solid var(--cross-color);
   border-top: var(--symbol-thickness) solid var(--cross-color);
-  content: '';
+  content: "";
   position: absolute;
 }
 
@@ -162,6 +162,47 @@
   }
 }
 
+.btn-palette {
+  color: transparent; /* Default text color */
+  border: 1px solid orange; /* Make the border transparent */
+  background: transparent; /* Transparent background */
+  background-image: linear-gradient(
+    to right,
+    red,
+    orange /* yellow,
+    green, blue, */ /* indigo,
+    violet */
+  ); /* Rainbow gradient */
+  background-clip: text; /* Clip the background to the border box */
+  -webkit-background-clip: text; /* For Safari */
+  position: relative; /* Position relative for pseudo-elements */
+  overflow: hidden; /* Hide overflow */
+  padding: 0.5rem 1rem; /* Add some padding */
+  font-size: 1rem; /* Set font size */
+  text-align: center; /* Center text */
+  outline: none;
+  transition: color 0.5s ease, background-clip 0.3s ease,
+    -webkit-background-clip 0.3s ease;
+}
+
+.btn-palette:hover {
+  background-clip: border-box; /* Clip the background to the border box */
+  -webkit-background-clip: border-box;
+  color: #fff; /* Change text color on hover */
+  box-shadow: 0 0.125rem 0.25rem 0 rgba(35, 52, 70, 0.4);
+  transform: translateY(-1px);
+}
+@media screen and (min-width: 1440px) {
+  .button-canvas {
+    flex-direction: column;
+    position: absolute;
+    top: 327px;
+    right: 27px;
+  }
+}
+.offcanvas-bottom {
+  height: 60vh !important;
+}
 .menu-item .nav-link.disabled {
   display: flex;
   margin: 0 0.75rem;
@@ -207,6 +248,8 @@
   .logo {
     display: none;
   }
+}
+@media screen and (max-width: 992px) {
   .row-checkbox {
     justify-content: center;
   }
@@ -225,6 +268,6 @@
   margin-left: 20px;
 }
 
-tbody#tabel-lokasi td:first-child {
+tbody#tabel-lokasi td:not(:last-child) {
   text-align: start;
 }

@@ -2,7 +2,11 @@ require("dotenv").config();
 const Hapi = require("@hapi/hapi");
 const Inert = require("@hapi/inert");
 const ClientError = require("./exceptions/ClientError");
-const { scrapeGoogleMaps, saveToDatabase } = require("./script/scraper");
+const {
+  scrapeGoogleMaps,
+  createGroup,
+  saveToDatabase,
+} = require("./script/scraper");
 const mysql = require("mysql2/promise");
 
 const init = async () => {
@@ -30,9 +34,7 @@ const init = async () => {
     method: "GET",
     path: "/",
     handler: (request, h) => {
-      return h.redirect(
-        "http://localhost:80/dev/Project%20data%20mining/Sinflobis/"
-      );
+      return h.redirect("http://localhost:80/disertasi/sinflobis/frontend");
     },
   });
 
@@ -40,7 +42,8 @@ const init = async () => {
     method: "POST",
     path: "/scrape",
     handler: async (request, h) => {
-      const { query, checkbox } = request.payload;
+      const { query, group = null, checkbox } = request.payload;
+      const groupId = await createGroup(group);
       const normalizedQuery = query.replace(/[;,]/g, "\n");
       const queries = normalizedQuery
         .split("\n")
@@ -60,7 +63,7 @@ const init = async () => {
             Array.isArray(popularTimesData) &&
             popularTimesData.length === 168
           ) {
-            await saveToDatabase(locationData, popularTimesData);
+            await saveToDatabase(locationData, groupId, popularTimesData);
             results.push({
               berhasil: `${singleQuery} : <strong>tidak terdapat <i>missing values</i></strong>`,
               locationData,
@@ -69,7 +72,7 @@ const init = async () => {
           } else {
             missingValues = 168 - popularTimesData.length;
             if (checkbox) {
-              await saveToDatabase(locationData, popularTimesData);
+              await saveToDatabase(locationData, groupId, popularTimesData);
               results.push({
                 berhasil: `${singleQuery} : <strong>terdapat ${missingValues} <i>missing values</i></strong>`,
                 locationData,

@@ -180,6 +180,8 @@ if (isset($_POST["hapusLokasi"])) {
   <script src="../assets/js/config.js"></script>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
   <!-- edit data -->
   <script>
     $(document).ready(function() {
@@ -196,7 +198,7 @@ if (isset($_POST["hapusLokasi"])) {
             '</select> baris data'
         },
         columnDefs: [{
-            targets: [3],
+            targets: [4],
             orderable: false
           } // Disable ordering for the first column (index 0)
         ]
@@ -256,6 +258,7 @@ if (isset($_POST["hapusLokasi"])) {
         document.body.style.overflow = 'hidden';
         $('#loading-screen').fadeIn('slow');
         const query = $('#query').val();
+        const group = $('#group').val();
         const checkbox = $('#defaultCheck1').prop('checked');
 
         $.ajax({
@@ -264,6 +267,7 @@ if (isset($_POST["hapusLokasi"])) {
           contentType: 'application/json',
           data: JSON.stringify({
             query,
+            group,
             checkbox
           }), // Send data as JSON
           success: function(response) {
@@ -306,6 +310,31 @@ if (isset($_POST["hapusLokasi"])) {
             }, 2000);
           },
         });
+      });
+
+      $("input[name='group[]']").keyup(function() {
+        nama = $(this).val();
+        $.ajax({
+            type: "POST",
+            url: "./data-lokasi.php",
+            data: {
+              grup: nama
+            },
+            dataType: "json"
+          })
+          .done(function(data) {
+            $("input[name='group[]']").autocomplete({
+              source: data,
+              select: function(event, ui) {
+                // console.log(ui.item.label, ui.item.value);
+                $(this).val(ui.item.label);
+                return false; // Prevent the default behavior
+              }
+            });
+          })
+          .fail(function(jqXHR, textStatus, errorThrown) {
+            console.error("AJAX error: ", textStatus, errorThrown);
+          })
       });
     });
   </script>
@@ -478,7 +507,7 @@ if (isset($_POST["hapusLokasi"])) {
               <div class="navbar-nav align-items-center">
                 <div class="nav-item d-flex align-items-center" id="datatable_filter">
                   <i class="bx bx-search fs-4 lh-0"></i>
-                  <input type="text" id="search" class="form-control border-0 shadow-none" placeholder="Cari Data Rest Area" aria-label="Search..." aria-controls="datatable" />
+                  <input type="text" id="search" class="form-control border-0 shadow-none" placeholder="Cari Data Tabel Rest Area" aria-label="Search..." aria-controls="datatable" />
                 </div>
               </div>
               <!-- /Search -->
@@ -543,9 +572,9 @@ if (isset($_POST["hapusLokasi"])) {
                     <form id="scrape-form">
                       <div class="row mb-3">
                         <label class="col-lg-2 col-form-label" for="query">Nama</label>
-                        <div class="col-lg-8 mb-3 input-group input-group-merge" style="box-shadow: none;width: 650px;">
+                        <div class="col-lg-8 mb-3 input-group input-group-merge textarea-input" style="box-shadow: none;">
                           <span id="basic-icon-default-fullname2" class="input-group-text"><i class='bx bx-map'></i></span>
-                          <textarea class="form-control" type="text" id="query" name="query" rows="1" placeholder="Masukkan nama rest area" required <?php echo $status_nim ?>></textarea>
+                          <textarea class="form-control" type="text" id="query" name="query" rows="1" placeholder="Masukkan nama rest area" required></textarea>
                         </div>
                         <div class="col-lg-2">
                           <button type="button" class="btn btn-outline-warning mx-auto wow fadeIn" data-bs-toggle="offcanvas"
@@ -553,19 +582,28 @@ if (isset($_POST["hapusLokasi"])) {
                             <i class='bx bx-help-circle'></i></button>
                         </div>
                       </div>
+                      <div class="row mb-3">
+                        <label class="col-lg-2 col-form-label" for="group">Grup (Opsional)</label>
+                        <div class="col-lg-8 mb-3 input-group input-group-merge textarea-input" style="box-shadow: none;">
+                          <span id="basic-icon-default-fullname2" class="input-group-text"><i class='bx bxs-group'></i></span>
+                          <input class="form-control" type="text" id="group" name="group[]" placeholder="Masukkan nama grup" />
+                        </div>
+                        <div class="col-lg-2">
+                          <button type="submit" name="tombol" class="btn btn-warning mx-auto" style="width: 123px;">Scrape</button>
+                        </div>
+                      </div>
                       <div class="row">
-                        <div class="col-sm-2"></div>
-                        <div class="col-sm-8 d-flex gap-3 mb-3 row-checkbox">
+                        <div class="col-lg-2"></div>
+                        <div class="col-lg-10 d-flex gap-3 mb-3 row-checkbox">
                           <input class="form-check-input" type="checkbox" value="" id="defaultCheck1" />
                           <label class="form-check-label" for="defaultCheck1">Simpan data kosong (<i>missing values</i>)</label>
                         </div>
-                        <div class="col-sm-2"></div>
                       </div>
-                      <div class="row">
-                        <div class="col-sm-12 d-flex justify-content-center">
+                      <!-- <div class="row">
+                        <div class="col-lg-12 d-flex justify-content-center">
                           <button type="submit" name="tombol" value="<?php echo $tombol_val ?>" class="btn btn-warning">Scrape</button>
                         </div>
-                      </div>
+                      </div> -->
                     </form>
                   </div>
                 </div>
@@ -585,6 +623,7 @@ if (isset($_POST["hapusLokasi"])) {
                   <thead>
                     <tr>
                       <th class="dt-head-center sorting" scope="col">Nama</th>
+                      <th class="dt-head-center sorting" scope="col">Grup</th>
                       <th class="dt-head-center sorting" scope="col">Latitude</th>
                       <th class="dt-head-center sorting" scope="col">Longitude</th>
                       <th></th>
@@ -593,15 +632,27 @@ if (isset($_POST["hapusLokasi"])) {
                   <tbody id="tabel-lokasi" class="table-border-bottom-0">
                     <?php
                     // ambil data scraping
-                    $scraping = mysqli_query($koneksi, "SELECT name,latitude,longitude FROM locations ORDER BY name");
+                    $scraping = mysqli_query($koneksi, "SELECT 
+                                                            l.name AS location_name, 
+                                                            lg.name AS group_name, 
+                                                            l.latitude, 
+                                                            l.longitude 
+                                                        FROM 
+                                                            locations l 
+                                                        LEFT JOIN 
+                                                            location_groups lg ON l.grup = lg.id 
+                                                        ORDER BY 
+                                                            l.name");
                     while ($data_scrap = mysqli_fetch_row($scraping)) {
                       $namaLokasi = $data_scrap[0];
-                      $latitude = $data_scrap[1];
-                      $longitude = $data_scrap[2];
+                      $grup = $data_scrap[1];
+                      $latitude = $data_scrap[2];
+                      $longitude = $data_scrap[3];
 
                       echo "
                           <tr>
                             <td><strong>$namaLokasi</strong></td>
+                            <td>$grup</td>
                             <td>$latitude</td>
                             <td>$longitude</td>
                             <td>

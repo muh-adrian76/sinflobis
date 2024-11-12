@@ -18,9 +18,12 @@ $fotoProfil = $data_prof[1];
 // $alamat = $data_prof[3];
 
 // ambil keterangan dashboard
-$dashboard = mysqli_query($koneksi, "SELECT COUNT(name) FROM locations");
-$d1 = mysqli_fetch_row($dashboard);
+$q_lokasi = mysqli_query($koneksi, "SELECT COUNT(id) FROM locations");
+$d1 = mysqli_fetch_row($q_lokasi);
 $jumlahRestArea = $d1[0];
+$q_grup = mysqli_query($koneksi, "SELECT COUNT(id) FROM location_groups");
+$d1 = mysqli_fetch_row($q_grup);
+$jumlahGrup = $d1[0];
 
 // ambil rata2 jam sibuk semua lokasi
 $meanValues = [];
@@ -168,10 +171,15 @@ if (isset($_POST['simpanAkun'])) {
         }, 1000)
       });
 
+      function groupTitleChart() {
+        var selectedText = $("#grup-lokasi").find("option:selected").text();
+        return `Rata-rata ${selectedText.toLowerCase()}`;
+      }
+
       // default chart
       let myChart;
       chartBackend(<?php echo $rata2 ?>);
-      $(".judul-grafik").text($("#grup-lokasi").find("option:selected").text());
+      $(".judul-grafik").text(groupTitleChart());
 
       function createChart(labels, data) {
         const ctx = document.getElementById('myChart').getContext('2d');
@@ -353,6 +361,7 @@ if (isset($_POST['simpanAkun'])) {
       $("#grup-lokasi").change(function() {
         const id = $(this).find("option:selected").val();
         $("input[name='lokasi[]']").val('');
+        $(".judul-grafik").text(groupTitleChart());
         fetchPopularTimesGroup(id);
       });
       // add group select form
@@ -859,13 +868,14 @@ if (isset($_POST['simpanAkun'])) {
                       </div>
                       <div class="col-lg-6 mb-3">
                         <label class="form-label" for="select-group">Grup / Jamak (Nilai Rata-Rata)</label>
-                        <div class="col-md hstack d-flex gap-3">
-                          <button type="button" data-bs-toggle="modal" data-bs-target="#tambahGrup" name="tambah_grup" class="btn btn-outline-warning"><i class='bx bx-plus'></i></button>
-                          <select id="grup-lokasi" class="form-select" name="select-group">
-                            <option value="">Pilih Grup</option>
-                            <option value="0" selected>Semua lokasi</option>
-                          </select>
-                        </div>
+                        <!-- <div class="col-md hstack d-flex gap-3">
+                          <button type="button" data-bs-toggle="modal" data-bs-target="#tambahGrup" name="tambah_grup" class="btn btn-outline-warning"><i class='bx bx-plus'></i></button> -->
+                        <select id="grup-lokasi" class="form-select" name="select-group">
+                          <option value="">Pilih Grup</option>
+                          <option value="0" selected>Semua lokasi</option>
+                        </select>
+                        <p class="mt-2" style="font-size: 85%;">Jumlah saat ini : <strong><?php echo $jumlahGrup ?> Grup</strong></p>
+                        <!-- </div> -->
                       </div>
                       <div class="col-lg-6">
                         <label class="form-label" for="locationSelect">Tunggal</label>
@@ -880,9 +890,9 @@ if (isset($_POST['simpanAkun'])) {
                             <h4 class="judul-grafik"></h4>
                             <canvas id="myChart"></canvas>
                           </div>
-                          <div class="d-flex gap-3 justify-content-center">
-                            <button id="resetChartColor" class="mt-3 btn btn-outline-dark" style="font-weight: bold;"><i class='bx bx-reset me-1'></i></i> Ubah Warna</button>
-                            <button id="saveChart" class="mt-3 btn btn-outline-warning" style="font-weight: bold;"><i class='bx bx-image me-1'></i> Simpan</button>
+                          <div class="d-flex gap-3 justify-content-center button-canvas mt-3">
+                            <button id="resetChartColor" class="btn btn-palette" style="font-weight: bold;"><i class='bx bx-reset me-1'></i></i> Ubah Warna</button>
+                            <button id="saveChart" class="btn btn-outline-warning" style="font-weight: bold;"><i class='bx bx-image me-1'></i> Simpan</button>
                           </div>
                         </div>
                       </div>

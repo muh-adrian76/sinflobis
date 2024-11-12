@@ -32,21 +32,30 @@ if (isset($_GET['group_id'])) {
             ];
         }
     } else {
-        $q = mysqli_query($koneksi, "SELECT member FROM location_groups WHERE id = '$group_id'");
+        // Kalibrasi data
+        // $q = mysqli_query($koneksi, "SELECT member FROM location_groups WHERE id = '$group_id'");
+
+        // $members = [];
+        // if ($row = mysqli_fetch_assoc($q)) {
+        //     // Split the member string into an array
+        //     $members = explode(',', $row['member']);
+        // }
+
+        $q = mysqli_query($koneksi, "SELECT id FROM locations WHERE grup = '$group_id'");
 
         $members = [];
-        if ($row = mysqli_fetch_assoc($q)) {
-            // Split the member string into an array
-            $members = explode(',', $row['member']);
+        while ($row = mysqli_fetch_assoc($q)) {
+            // Collect all location IDs into the $members array
+            $members[] = $row['id'];
         }
 
         if (!empty($members)) {
             $members_placeholder = implode(',', $members);
             $sql = "SELECT day, time, AVG(busy_percentage) AS mean_busy_percentage   
-        FROM popular_times   
-        WHERE location_id IN ($members_placeholder)   
-        GROUP BY day, time   
-        ORDER BY time";
+                    FROM popular_times   
+                    WHERE location_id IN ($members_placeholder)   
+                    GROUP BY day, time   
+                    ORDER BY time";
             $results = mysqli_query($koneksi, $sql);
             foreach ($results as $row) {
                 $meanValues[] = [

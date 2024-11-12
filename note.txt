@@ -1,2 +1,7 @@
-1. 1 akun memiliki setup grup pribadi
 2. form screenshoot => link window.href, $('input[role="combobox"]').change attr(aria-expanded="false")
+
+Rest Area KM 726B;Rest Area KM 391 A Kendal Jasamarga;Rest Area Kendal "TRAVOY KM 389 B"
+Rest Area KM 360 B Subah - Batang;Rest Area KM 338 A Tol Pekalongan
+Rest Area KM 379A Batang;Rest Area KM 424 B Semarang;Resta Area Pendopo KM 456 B
+Rest Area Km 429 B Tol Ungaran - Bawen;Rest Area KM 429 A Tol Ungaran - Bawen
+Rest Area KM 439A Semarang - Solo;Rest Area KM 487 A Boyolali;Rest Area KM 487 B Boyolali
