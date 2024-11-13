@@ -638,20 +638,20 @@ if (isset($_POST['simpanAkun'])) {
             </a>
           </li>
           <li class="menu-item">
-            <a href="screenshoot.php" class="nav-link disabled">
+            <a href="screenshoot.php" class="menu-link">
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/traffic-jam.png" alt="">
               <div data-i18n="Tables">Screenshoot Trafik</div>
             </a>
           </li>
 
           <li class="menu-item">
-            <a href="topsis.php" class="nav-link disabled">
+            <a href="topsis.php" class="menu-link">
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/topsis.png" alt="">
               <div data-i18n="Tables">Seleksi TOPSIS</div>
             </a>
           </li>
           <li class="menu-item">
-            <a href="waspas.php" class="nav-link disabled">
+            <a href="waspas.php" class="menu-link">
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/waspas.png" alt="">
               <div data-i18n="Tables">Seleksi WASPAS</div>
             </a>
@@ -862,7 +862,7 @@ if (isset($_POST['simpanAkun'])) {
                         <div class="divider-text"><i class='bx bx-search'></i></div>
                       </div>
                     </div>
-                    <div class="row">
+                    <div class="row search-grafik">
                       <div id="defaultFormControlHelp" class="form-text mb-3">
                         Pilih salah satu metode pencarian
                       </div>
@@ -891,7 +891,7 @@ if (isset($_POST['simpanAkun'])) {
                             <canvas id="myChart"></canvas>
                           </div>
                           <div class="d-flex gap-3 justify-content-center button-canvas mt-3">
-                            <button id="resetChartColor" class="btn btn-palette" style="font-weight: bold;"><i class='bx bx-reset me-1'></i></i> Ubah Warna</button>
+                            <button id="resetChartColor" class="btn btn-palette" style="font-weight: bold;"><i class='bx bx-reset me-1'></i> Ubah Warna</button>
                             <button id="saveChart" class="btn btn-outline-warning" style="font-weight: bold;"><i class='bx bx-image me-1'></i> Simpan</button>
                           </div>
                         </div>

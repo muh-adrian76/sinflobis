@@ -188,7 +188,7 @@ if (isset($_POST["hapusLokasi"])) {
       $(".alert:not(.alert-success)").fadeOut(5000);
 
       table = $('#datatable').DataTable({
-        "dom": '<"top"f>rt<"bottom"ilp><"clear">',
+        "dom": '<"top"f>rt<"bottom"ilp><"refresh-scrape">',
         "language": {
           "lengthMenu": 'Tampilkan <select>' +
             '<option value="10">10</option>' +
@@ -202,6 +202,11 @@ if (isset($_POST["hapusLokasi"])) {
             orderable: false
           } // Disable ordering for the first column (index 0)
         ]
+      });
+      $('<button id="refresh-scrape" style="margin-top: 1.05rem;" class="btn btn-warning"><i class="bx bx-reset me-1"></i> Perbarui Data Scraping</button>').appendTo('.refresh-scrape');
+      $('#refresh-scrape').on('click', function() {
+        var myModal = new bootstrap.Modal(document.getElementById('re_scrape'));
+        myModal.show();
       });
       $('#search').on('keyup', function() {
         table.search(this.value).draw();
@@ -388,20 +393,20 @@ if (isset($_POST["hapusLokasi"])) {
             </a>
           </li>
           <li class="menu-item">
-            <a href="screenshoot.php" class="nav-link disabled">
+            <a href="screenshoot.php" class="menu-link">
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/traffic-jam.png" alt="">
               <div data-i18n="Tables">Screenshoot Trafik</div>
             </a>
           </li>
 
           <li class="menu-item">
-            <a href="topsis.php" class="nav-link disabled">
+            <a href="topsis.php" class="menu-link">
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/topsis.png" alt="">
               <div data-i18n="Tables">Seleksi TOPSIS</div>
             </a>
           </li>
           <li class="menu-item">
-            <a href="waspas.php" class="nav-link disabled">
+            <a href="waspas.php" class="menu-link">
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/waspas.png" alt="">
               <div data-i18n="Tables">Seleksi WASPAS</div>
             </a>
@@ -507,7 +512,7 @@ if (isset($_POST["hapusLokasi"])) {
               <div class="navbar-nav align-items-center">
                 <div class="nav-item d-flex align-items-center" id="datatable_filter">
                   <i class="bx bx-search fs-4 lh-0"></i>
-                  <input type="text" id="search" class="form-control border-0 shadow-none" placeholder="Cari Data Tabel Rest Area" aria-label="Search..." aria-controls="datatable" />
+                  <input type="text" id="search" class="form-control border-0 shadow-none" placeholder="Cari Data Tabel Rest Area" aria-label="Cari Data Tabel Rest Area" aria-controls="datatable" />
                 </div>
               </div>
               <!-- /Search -->
@@ -794,6 +799,33 @@ if (isset($_POST["hapusLokasi"])) {
                       </div>
                       <div class="modal-body delete"></div>
                       <div class="modal-footer delete"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class='modal fade' id='re_scrape' aria-labelledby='re_scrape' tabindex='-1' style='display: none' aria-hidden='true'>
+                  <div class='modal-dialog modal-dialog-centered'>
+                    <div class='modal-content'>
+                      <!-- Register -->
+                      <div class='card'>
+                        <div class='card-body'>
+                          <div class='d-flex flex-column align-items-center'>
+                            <h4 class='mb-2'>Lupa Password? 🔒</h4>
+                            <p class='mb-4'>Tolong isi data berikut !</p>
+                          </div>
+                          <form id='formAuthentication form3' class='mb-3' action='' method='POST'>
+                            <div class='mb-3'>
+                              <label for='reset_pswd' class='form-label'>Username</label>
+                              <div class="input-group input-group-merge">
+                                <input type='text' class='form-control' id='reset_pswd' name='reset_pswd' placeholder='Masukkan Username atau Nomor WA (08...)' autofocus required />
+                                <span id="basic-icon-default-fullname2" class="input-group-text"><i class='bx bx-id-card'></i></span>
+                              </div>
+                            </div>
+                            <div class='mb-3'>
+                              <button class='btn btn-warning d-grid w-100' type='submit' name='lupa_pswd' value='lupa_pswd'>Ubah Password</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

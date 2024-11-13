@@ -7,7 +7,6 @@ const {
   createGroup,
   saveToDatabase,
 } = require("./script/scraper");
-const mysql = require("mysql2/promise");
 
 const init = async () => {
   const server = Hapi.server({
@@ -18,14 +17,6 @@ const init = async () => {
         origin: ["*"],
       },
     },
-  });
-
-  const db = await mysql.createConnection({
-    user: process.env.MYSQL_USER,
-    host: process.env.MYSQL_HOST,
-    database: process.env.MYSQL_DATABASE,
-    password: process.env.MYSQL_PASSWORD,
-    port: process.env.MYSQL_PORT,
   });
 
   await server.register(Inert);
@@ -90,40 +81,6 @@ const init = async () => {
         }
       }
       return h.response({ status: "success", data: results }).code(201);
-    },
-  });
-
-  server.route({
-    method: "POST",
-    path: "/grup-lokasi",
-    handler: async (request, h) => {
-      const { grup } = request.payload;
-      if (grup) {
-        const { nama, anggota } = grup;
-        const membersString = anggota.join(",");
-        const query =
-          "INSERT INTO location_groups (name, member) VALUES (?, ?)";
-
-        try {
-          const [results] = await db.execute(query, [nama, membersString]);
-          return h
-            .response({
-              status: "success",
-              data: results,
-              message: "Group saved successfully.",
-            })
-            .code(201);
-        } catch (error) {
-          console.error("Error inserting data:", error);
-          return h
-            .response({ status: "error", message: "Failed to save group." })
-            .code(500);
-        }
-      } else {
-        return h
-          .response({ status: "error", message: "No group data received." })
-          .code(400);
-      }
     },
   });
 

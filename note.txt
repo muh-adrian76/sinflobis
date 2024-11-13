@@ -1,4 +1,15 @@
-2. form screenshoot => link window.href, $('input[role="combobox"]').change attr(aria-expanded="false")
+*scraping
+update data popular_times
+
+*screenshoot
+form screenshoot => link window.href, $('input[role="combobox"]').change attr(aria-expanded="false")
+
+*topsis
+form kriteria -> CRUD id, kode, nama, bobot, sifat
+form alternatif -> CRUD id, nama, pilih nilai untuk kriteria
+tabel hasil topsis -> nilai preferensi/peringkat, modal proses topsis (nilai matriks, matriks ternormalisasi, bobot ternormalisasi, matriks idel +/-, jarak solusi ideal +/-) 
+
+waspas
 
 Rest Area KM 726B;Rest Area KM 391 A Kendal Jasamarga;Rest Area Kendal "TRAVOY KM 389 B"
 Rest Area KM 360 B Subah - Batang;Rest Area KM 338 A Tol Pekalongan

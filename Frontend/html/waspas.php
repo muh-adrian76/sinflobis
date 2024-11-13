@@ -406,7 +406,7 @@ elseif (isset($_GET['t'])) {
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="screenshoot.php" class="nav-link disabled">
+                        <a href="screenshoot.php" class="menu-link">
                             <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/traffic-jam.png" alt="">
                             <div data-i18n="Tables">Screenshoot Trafik</div>
                         </a>
@@ -525,7 +525,7 @@ elseif (isset($_GET['t'])) {
                             <div class="navbar-nav align-items-center">
                                 <div class="nav-item d-flex align-items-center" id="datatable_filter">
                                     <i class="bx bx-search fs-4 lh-0"></i>
-                                    <input type="text" id="search" class="form-control border-0 shadow-none" placeholder="Search..." aria-label="Search..." aria-controls="datatable" />
+                                    <input type="text" id="search" class="form-control border-0 shadow-none" placeholder="Cari Data Tabel Waspas" aria-label="Cari Data Tabel Waspas" aria-controls="datatable" />
                                 </div>
                             </div>
                             <!-- /Search -->

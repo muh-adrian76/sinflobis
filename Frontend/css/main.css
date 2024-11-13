@@ -199,6 +199,11 @@
     top: 327px;
     right: 27px;
   }
+  .search-grafik select,
+  .search-grafik input {
+    width: 75%;
+    margin: 0 auto;
+  }
 }
 .offcanvas-bottom {
   height: 60vh !important;
