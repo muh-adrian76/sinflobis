@@ -590,7 +590,7 @@ if (isset($_POST['simpanAkun'])) {
 
 <body>
   <!-- loader -->
-  <div id="loading-screen" style="display: block;">
+  <div id="loading-screen" style="display: none;">
     <div class="loading-wrapper">
       <div class="circle-loader">
         <div class="status draw"></div>
@@ -640,7 +640,7 @@ if (isset($_POST['simpanAkun'])) {
           <li class="menu-item">
             <a href="screenshoot.php" class="menu-link">
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/traffic-jam.png" alt="">
-              <div data-i18n="Tables">Screenshoot Trafik</div>
+              <div data-i18n="Tables">Screenshot Trafik</div>
             </a>
           </li>
 

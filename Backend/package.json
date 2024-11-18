@@ -21,7 +21,7 @@
     "express": "^4.19.2",
     "mysql2": "^3.11.3",
     "nanoid": "^3.0.0",
-    "puppeteer": "^22.15.0",
+    "puppeteer": "^23.8.0",
     "serpapi": "^2.1.0"
   }
 }

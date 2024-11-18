@@ -84,23 +84,8 @@ if (isset($_POST['simpanAkun'])) {
             }, 3000);
           </script>";
   }
-}
-// ELSEIF DEFAULT
-elseif (isset($_GET['t'])) {
-  if ($_GET['t'] == 'edit') {
-    $username = $_GET['username'];
-
-    $status_username = "readonly";
-    $tombol_val = "edit";
-    $disableModal = "disabled";
-  }
 } else {
-  $username = "";
-  $password = "";
-  $status_username = "";
   $tombol_val = "simpan";
-  $no_edit = "readonly";
-  $no_edit_option = "disabled";
 }
 
 ?>
@@ -151,6 +136,7 @@ elseif (isset($_GET['t'])) {
   <script>
     $(document).ready(function() {
       $(".alert:not(.alert-success)").fadeOut(5000);
+      // loader
       const statusChange = function(status) {
         const el = $('.circle-loader')
         el.removeClass()
@@ -212,7 +198,7 @@ elseif (isset($_GET['t'])) {
 </head>
 
 <body>
-  <div id="loading-screen" style="display: block;">
+  <div id="loading-screen" style="display: none;">
     <div class="loading-wrapper">
       <div class="circle-loader">
         <div class="status draw"></div>
@@ -261,7 +247,7 @@ elseif (isset($_GET['t'])) {
           <li class="menu-item">
             <a href="screenshoot.php" class="menu-link">
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/traffic-jam.png" alt="">
-              <div data-i18n="Tables">Screenshoot Trafik</div>
+              <div data-i18n="Tables">Screenshot Trafik</div>
             </a>
           </li>
 

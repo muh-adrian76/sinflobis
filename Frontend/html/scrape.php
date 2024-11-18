@@ -84,27 +84,7 @@ if (isset($_POST['simpanAkun'])) {
             }, 3000);
           </script>";
   }
-}
-
-// ELSEIF DEFAULT
-if (isset($_GET['t'])) {
-  if ($_GET['t'] == 'edit') {
-    $nim = $_GET['nim'];
-    //ambil data mhs berdasarkan ni tsb
-    $q = mysqli_query($koneksi, "SELECT nama,kelas FROM mhs WHERE nim='$nim'");
-    $d = mysqli_fetch_row($q);
-    $nama = $d[0];
-    $kelas = $d[1];
-    $tombol_val = "edit";
-    $cardHeader = "Edit";
-    $status_nim = "readonly";
-  }
 } else {
-  $nim = "";
-  $nama = "";
-  $kelas = "";
-  $status_nim = "";
-  $cardHeader = "Tambah";
   $tombol_val = "simpan";
 }
 
@@ -131,7 +111,7 @@ if (isset($_POST["hapusLokasi"])) {
   echo "<script>
           setTimeout(function() {
             window.location.replace('scrape.php');
-        }, 3000);
+          }, 3000);
         </script>";
   $lokasi = "";
 }
@@ -198,26 +178,26 @@ if (isset($_POST["hapusLokasi"])) {
             '</select> baris data'
         },
         columnDefs: [{
-            targets: [4],
+            targets: [5],
             orderable: false
           } // Disable ordering for the first column (index 0)
         ]
       });
       $('<button id="refresh-scrape" style="margin-top: 1.05rem;" class="btn btn-warning"><i class="bx bx-reset me-1"></i> Perbarui Data Scraping</button>').appendTo('.refresh-scrape');
-      $('#refresh-scrape').on('click', function() {
-        var myModal = new bootstrap.Modal(document.getElementById('re_scrape'));
-        myModal.show();
-      });
+
       $('#search').on('keyup', function() {
         table.search(this.value).draw();
       });
       // modal delete
+      $("#formHapus").on('submit', function(event) {
+        event.preventDefault();
+      });
       $("tbody a:nth-child(1)").click(function() {
         lokasi = $(this).attr('href'); // untuk variable nim dari attribut href
         $(".modal-title.delete").text("Konfirmasi Hapus");
         $(".modal-body.delete").html("Apakah anda yakin ingin menghapus<br><strong>" + lokasi + "</strong> ?");
 
-        form1 = "<form method=post><input type=hidden name=lokasi value='" + lokasi + "'>";
+        form1 = "<form method=post id=formHapus><input type=hidden name=lokasi value='" + lokasi + "'>";
         form2 = "<button type=submit name=hapusLokasi class=\"btn btn-danger m-2\" data-bs-dismiss=modal>Ya</button>";
         form3 = "<button type=button class=\"btn btn-warning\" data-bs-dismiss=modal>Tidak</button>";
         form4 = "</form>";
@@ -226,7 +206,7 @@ if (isset($_POST["hapusLokasi"])) {
         $(".modal-footer.delete").append(form);
       });
 
-      // scrape data
+      // loader
       const statusChange = function(status) {
         const el = $('.circle-loader')
         el.removeClass()
@@ -236,10 +216,14 @@ if (isset($_POST["hapusLokasi"])) {
       $(window).on('load', function() {
         statusChange('sukses');
         setTimeout(function() {
-          $('#loading-screen').fadeOut('slow', function() {
-            statusChange('draw')
-          });
+          $('#loading-screen').fadeOut('slow');
         }, 1000)
+      });
+
+      // scrape modal
+      const rescrapeModal = new bootstrap.Modal(document.getElementById('re_scrape'));
+      $('#refresh-scrape').on('click', function() {
+        rescrapeModal.show();
       });
 
       const scrapeResultButton = $('<button>', {
@@ -247,7 +231,8 @@ if (isset($_POST["hapusLokasi"])) {
         class: 'btn btn-warning mt-3',
         click: function() {
           $('#loading-screen').fadeOut('fast');
-          var myModal = new bootstrap.Modal(document.getElementById('scrape-result'));
+          rescrapeModal.hide();
+          const myModal = new bootstrap.Modal(document.getElementById('scrape-result'));
           myModal.show();
         }
       });
@@ -259,6 +244,7 @@ if (isset($_POST["hapusLokasi"])) {
       $('#scrape-form').on('submit', function(event) {
         event.preventDefault(); // Prevent form from refreshing the page
         // tambah loading screen
+        statusChange('draw');
         $('.loading-text').text('Tolong tunggu hingga selesai, jangan me-refresh halaman...')
         document.body.style.overflow = 'hidden';
         $('#loading-screen').fadeIn('slow');
@@ -274,6 +260,69 @@ if (isset($_POST["hapusLokasi"])) {
             query,
             group,
             checkbox
+          }), // Send data as JSON
+          success: function(response) {
+            console.log(response);
+            statusChange('sukses');
+            $('.loading-text').text('Scraping telah selesai!')
+            $('.loading-wrapper').append(scrapeResultButton);
+
+            $('#scrape-result-table').empty();
+            const berhasilList = response.data.filter(item => item.berhasil).map(item => item.berhasil);
+            const gagalList = response.data.filter(item => item.gagal).map(item => item.gagal);
+            const maxRows = Math.max(berhasilList.length, gagalList.length);
+            for (let i = 0; i < maxRows; i++) {
+              const row = $('<tr>');
+              row.append($('<td>').text(i + 1)); // First column: index + 1
+              if (i < berhasilList.length) {
+                row.append($('<td>').html(berhasilList[i])); // Second column: berhasil
+              } else {
+                row.append($('<td>').text('')); // Second column: empty if no lebih
+              }
+              if (i < gagalList.length) {
+                row.append($('<td>').html(gagalList[i])); // Third column: gagal
+              } else {
+                row.append($('<td>').text('')); // Third column: empty if no gagal
+              }
+              $('#scrape-result-table').append(row);
+            }
+          },
+          error: function(error) {
+            console.error('Pesan:', error);
+            statusChange('failed');
+            $('.loading-text').text('Gagal melakukan scraping!')
+            setTimeout(function() {
+              $('#loading-screen').fadeOut('fast');
+              document.body.style.overflow = 'auto';
+              setTimeout(function() {
+                statusChange('draw');
+                $('.loading-text').text('Tolong tunggu hingga selesai, jangan me-refresh halaman...')
+              }, 1000);
+            }, 2000);
+          },
+        });
+      });
+
+      $('#rescrape-form').on('submit', function(event) {
+        event.preventDefault();
+        const query = $('#nama_lokasi').val();
+        const group = $('#nama_grup').val();
+        if (query === '' && group === '') {
+          event.preventDefault(); // Prevent form submission
+          alert('Tolong isi salah satu form.').show();
+        }
+        statusChange('draw');
+        $('.loading-text').text('Tolong tunggu hingga selesai, jangan me-refresh halaman...')
+        document.body.style.overflow = 'hidden';
+        $('#loading-screen').fadeIn('slow');
+
+        $.ajax({
+          url: 'http://localhost:3000/rescrape',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            query,
+            group
           }), // Send data as JSON
           success: function(response) {
             console.log(response);
@@ -341,12 +390,69 @@ if (isset($_POST["hapusLokasi"])) {
             console.error("AJAX error: ", textStatus, errorThrown);
           })
       });
+
+      $("input[name='nama_grup[]']").keyup(function() {
+        nama = $(this).val();
+        $.ajax({
+            type: "POST",
+            url: "./data-lokasi.php",
+            data: {
+              grup: nama
+            },
+            dataType: "json"
+          })
+          .done(function(data) {
+            $("input[name='nama_grup[]']").autocomplete({
+              source: data,
+              select: function(event, ui) {
+                // console.log(ui.item.label, ui.item.value);
+                $(this).val(ui.item.label);
+                return false; // Prevent the default behavior
+              },
+              create: function() {
+                // Set the z-index of the autocomplete menu
+                $(this).data("ui-autocomplete").menu.element.css("z-index", 1091); // Adjust the z-index as needed
+              }
+            });
+          })
+          .fail(function(jqXHR, textStatus, errorThrown) {
+            console.error("AJAX error: ", textStatus, errorThrown);
+          })
+      });
+
+      $("input[name='nama_lokasi[]']").keyup(function() {
+        lokasi = $(this).val();
+        $.ajax({
+            type: "POST",
+            url: "./data-lokasi.php",
+            data: {
+              nama: lokasi
+            },
+            dataType: "json"
+          })
+          .done(function(data) {
+            $("input[name='nama_lokasi[]']").autocomplete({
+              source: data,
+              select: function(event, ui) {
+                $(this).val(ui.item.label);
+                return false; // Prevent the default behavior
+              },
+              create: function() {
+                // Set the z-index of the autocomplete menu
+                $(this).data("ui-autocomplete").menu.element.css("z-index", 1091); // Adjust the z-index as needed
+              }
+            });
+          })
+          .fail(function(jqXHR, textStatus, errorThrown) {
+            console.error("AJAX error: ", textStatus, errorThrown);
+          })
+      });
     });
   </script>
 </head>
 
 <body>
-  <div id="loading-screen" style="display: block;">
+  <div id="loading-screen" style="display: none;">
     <div class="loading-wrapper">
       <div class="circle-loader">
         <div class="status draw"></div>
@@ -395,7 +501,7 @@ if (isset($_POST["hapusLokasi"])) {
           <li class="menu-item">
             <a href="screenshoot.php" class="menu-link">
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/traffic-jam.png" alt="">
-              <div data-i18n="Tables">Screenshoot Trafik</div>
+              <div data-i18n="Tables">Screenshot Trafik</div>
             </a>
           </li>
 
@@ -570,7 +676,7 @@ if (isset($_POST["hapusLokasi"])) {
               <div class="col-xxl">
                 <div class="card">
                   <div class="card-header d-flex align-items-center justify-content-center">
-                    <h5 class="mb-0"><?php echo $cardHeader ?> Data Rest Area</h5>
+                    <h5 class="mb-0">Tambah Data Rest Area</h5>
 
                   </div>
                   <div class="card-body">
@@ -631,6 +737,7 @@ if (isset($_POST["hapusLokasi"])) {
                       <th class="dt-head-center sorting" scope="col">Grup</th>
                       <th class="dt-head-center sorting" scope="col">Latitude</th>
                       <th class="dt-head-center sorting" scope="col">Longitude</th>
+                      <th class="dt-head-center sorting" scope="col">Diambil Pada</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -641,7 +748,8 @@ if (isset($_POST["hapusLokasi"])) {
                                                             l.name AS location_name, 
                                                             lg.name AS group_name, 
                                                             l.latitude, 
-                                                            l.longitude 
+                                                            l.longitude,
+                                                            l.last_updated
                                                         FROM 
                                                             locations l 
                                                         LEFT JOIN 
@@ -653,6 +761,9 @@ if (isset($_POST["hapusLokasi"])) {
                       $grup = $data_scrap[1];
                       $latitude = $data_scrap[2];
                       $longitude = $data_scrap[3];
+                      $last_updated = $data_scrap[4];
+                      $dateTime = new DateTime($last_updated);
+                      $formattedDate = $dateTime->format('H:i:s') . ' WIB, ' . $dateTime->format('d-m-Y');
 
                       echo "
                           <tr>
@@ -660,6 +771,7 @@ if (isset($_POST["hapusLokasi"])) {
                             <td>$grup</td>
                             <td>$latitude</td>
                             <td>$longitude</td>
+                            <td>$formattedDate</td>
                             <td>
                                   <a class=\"text-secondary\" 
                                     href=\"$namaLokasi\"
@@ -798,7 +910,7 @@ if (isset($_POST["hapusLokasi"])) {
                         <h5 class="modal-title delete" id="modalCenterTitle"></h5>
                       </div>
                       <div class="modal-body delete"></div>
-                      <div class="modal-footer delete"></div>
+                      <div class="modal-footer delete d-flex justify-content-center mb-3"></div>
                     </div>
                   </div>
                 </div>
@@ -809,21 +921,36 @@ if (isset($_POST["hapusLokasi"])) {
                       <div class='card'>
                         <div class='card-body'>
                           <div class='d-flex flex-column align-items-center'>
-                            <h4 class='mb-2'>Lupa Password? 🔒</h4>
-                            <p class='mb-4'>Tolong isi data berikut !</p>
-                          </div>
-                          <form id='formAuthentication form3' class='mb-3' action='' method='POST'>
-                            <div class='mb-3'>
-                              <label for='reset_pswd' class='form-label'>Username</label>
-                              <div class="input-group input-group-merge">
-                                <input type='text' class='form-control' id='reset_pswd' name='reset_pswd' placeholder='Masukkan Username atau Nomor WA (08...)' autofocus required />
-                                <span id="basic-icon-default-fullname2" class="input-group-text"><i class='bx bx-id-card'></i></span>
+                            <div class='d-flex flex-column align-items-center'>
+                              <h4 class='mb-2'>Perbarui Data Rest Area <i class='bx bx-refresh ps-2' style="font-size: 2rem;"></i></h4>
+                              <p>Tolong pilih salah satu metode pembaruan dibawah!</p>
+                            </div>
+                            <form id='rescrape-form' style="width: 70%;">
+                              <div class='mb-3'>
+                                <div class="form-floating">
+                                  <input
+                                    type="text"
+                                    class="form-control mb-3"
+                                    id="nama_grup"
+                                    name="nama_grup[]"
+                                    placeholder="Masukkan Nama Grup"
+                                    aria-describedby="floatingInputHelp" />
+                                  <label for="nama_grup[]">Rest Area (Grup)</label>
+                                </div>
+                                <div class="form-floating">
+                                  <input
+                                    type="text"
+                                    class="form-control mb-3"
+                                    id="nama_lokasi"
+                                    name="nama_lokasi[]"
+                                    placeholder="Masukkan Nama Rest Area"
+                                    aria-describedby="floatingInputHelp" />
+                                  <label for="nama_lokasi[]">Rest Area (Tunggal)</label>
+                                </div>
                               </div>
-                            </div>
-                            <div class='mb-3'>
-                              <button class='btn btn-warning d-grid w-100' type='submit' name='lupa_pswd' value='lupa_pswd'>Ubah Password</button>
-                            </div>
-                          </form>
+                              <button class='btn btn-warning d-grid w-100' type='submit'>Scrape Ulang</button>
+                            </form>
+                          </div>
                         </div>
                       </div>
                     </div>

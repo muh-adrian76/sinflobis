@@ -11,11 +11,14 @@ const scrapeGoogleMaps = async (query) => {
   );
   const url = "https://www.google.com/maps/";
 
+  await page.setViewport({ width: 1600, height: 900 });
   await page.goto(url, {
     waitUntil: "networkidle2",
   });
 
-  await page.waitForSelector(".searchboxinput", { timeout: 10000 });
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  await page.waitForSelector(".searchboxinput", { timeout: 30000 });
   await page.type(".searchboxinput", query);
   await page.waitForSelector('div[data-index="0"]', { timeout: 10000 });
   const firstSuggestion = await page.$('div[data-index="0"]');
@@ -28,6 +31,7 @@ const scrapeGoogleMaps = async (query) => {
   await page.waitForSelector('div[role="main"]', {
     timeout: 10000,
   });
+  await delay(5000);
   let jamSibuk;
   try {
     jamSibuk = await page.waitForSelector('div[aria-label^="Jam favorit di"]', {
@@ -54,6 +58,7 @@ const scrapeGoogleMaps = async (query) => {
           await page.waitForSelector('div[aria-label^="Jam favorit di"]', {
             timeout: 10000,
           });
+          await delay(5000);
         } else {
           throw new Error("No link found in div[role='feed']");
         }
@@ -71,13 +76,10 @@ const scrapeGoogleMaps = async (query) => {
   const locationData = await page.evaluate(() => {
     const name = document.querySelector("h1").textContent;
     const url = window.location.href;
-
-    // Use a regular expression to match the "@latitude,longitude" pattern
     const match = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (match) {
       const latitude = match[1];
-      const longitude = match[2];
-
+      let longitude = match[2];
       return { name, latitude, longitude };
     }
   });
@@ -149,8 +151,13 @@ const createGroup = async (group_name) => {
   });
   try {
     await connection.beginTransaction();
-    let groupId = "";
-    if (group_name !== null) {
+    let groupId;
+
+    if (group_name === "") {
+      throw new Error(`Invalid value`);
+    }
+
+    if (group_name !== "") {
       const [existingGroup] = await connection.execute(
         "SELECT id FROM location_groups WHERE name = ?",
         [group_name]
@@ -179,6 +186,42 @@ const createGroup = async (group_name) => {
   }
 };
 
+const rescrapeSelection = async (query, groupId) => {
+  const connection = await mysql.createConnection({
+    user: process.env.MYSQL_USER,
+    host: process.env.MYSQL_HOST,
+    database: process.env.MYSQL_DATABASE,
+    password: process.env.MYSQL_PASSWORD,
+    port: process.env.MYSQL_PORT,
+  });
+
+  try {
+    let queries = [];
+    if (groupId) {
+      const [locations] = await connection.execute(
+        "SELECT name FROM locations WHERE grup = ?",
+        [groupId]
+      );
+
+      // Extract location names
+      queries = locations.map((location) => location.name);
+    }
+
+    if (query) {
+      if (!queries.includes(query)) {
+        queries.push(query);
+      }
+    }
+
+    return queries;
+  } catch (error) {
+    console.error("Error fetching queries:", error);
+    throw new Error("Could not fetch queries from the database");
+  } finally {
+    await connection.end();
+  }
+};
+
 const saveToDatabase = async (locationData, groupId, popularTimesData) => {
   const connection = await mysql.createConnection({
     user: process.env.MYSQL_USER,
@@ -190,41 +233,71 @@ const saveToDatabase = async (locationData, groupId, popularTimesData) => {
   try {
     await connection.beginTransaction();
 
-    // const [locationChecks] = await connection.execute(
-    //   "SELECT * FROM locations WHERE name = ?",
-    //   [locationData.name]
-    // );
-    // if (locationChecks.length > 0) {
-    //   throw new Error("Lokasi sudah ada di database");
-    // }
-
+    // remove ""
     locationData.name = locationData.name.replace(/"/g, "");
-    const [locationResult] = await connection.execute(
-      "INSERT INTO locations (name, grup, latitude, longitude) VALUES (?, ?, ?, ?)",
-      [
-        locationData.name,
-        groupId,
-        locationData.latitude,
-        locationData.longitude,
-      ]
+    const [locationChecks] = await connection.execute(
+      "SELECT id FROM locations WHERE name = ?",
+      [locationData.name]
     );
-    const locationId = locationResult.insertId;
 
-    for (const dayData of popularTimesData) {
-      const hour = parseInt(dayData.time, 10);
-      const formattedTime = `${hour.toString().padStart(2, "0")}:00`;
+    let locationId;
 
+    if (locationChecks.length > 0) {
+      // Location exists, update the existing record
+      locationId = locationChecks[0].id; // Get the existing location ID
       await connection.execute(
-        "INSERT INTO popular_times (day, time, busy_percentage, location_id) VALUES (?, ?, ?, ?)",
-        [dayData.day, formattedTime, dayData.busy_percentage, locationId]
+        "UPDATE locations SET last_updated=NOW() WHERE id = ?",
+        [locationId]
+      );
+      await connection.execute(
+        "DELETE FROM popular_times WHERE location_id = ?",
+        [locationId]
+      );
+      await connection.execute("ALTER TABLE popular_times DROP id;");
+      await connection.execute(
+        "ALTER TABLE popular_times ADD id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;"
+      );
+      for (const dayData of popularTimesData) {
+        const hour = parseInt(dayData.time, 10);
+        const formattedTime = `${hour.toString().padStart(2, "0")}:00`;
+
+        await connection.execute(
+          "INSERT INTO popular_times (day, time, busy_percentage, location_id) VALUES (?, ?, ?, ?)",
+          [dayData.day, formattedTime, dayData.busy_percentage, locationId]
+        );
+      }
+      console.log(
+        `Berhasil memperbarui data ${locationData.name} pada database!`
+      );
+    } else {
+      const [locationResult] = await connection.execute(
+        "INSERT INTO locations (name, grup, latitude, longitude, last_updated) VALUES (?, ?, ?, ?, NOW())",
+        [
+          locationData.name,
+          groupId,
+          locationData.latitude,
+          locationData.longitude,
+        ]
+      );
+      locationId = locationResult.insertId; // Get the new location ID
+      for (const dayData of popularTimesData) {
+        const hour = parseInt(dayData.time, 10);
+        const formattedTime = `${hour.toString().padStart(2, "0")}:00`;
+
+        await connection.execute(
+          "INSERT INTO popular_times (day, time, busy_percentage, location_id) VALUES (?, ?, ?, ?)",
+          [dayData.day, formattedTime, dayData.busy_percentage, locationId]
+        );
+      }
+      console.log(
+        `Berhasil menyimpan data ${locationData.name} pada database!`
       );
     }
 
-    // Commit the transaction
     await connection.commit();
-    console.log(`Berhasil menyimpan data ${locationData.name} pada database!`);
   } catch (error) {
     // Roll back the transaction on error
+    console.error(error);
     console.log(`Gagal menyimpan data ${locationData.name} pada database!`);
 
     await connection.rollback();
@@ -234,4 +307,9 @@ const saveToDatabase = async (locationData, groupId, popularTimesData) => {
   }
 };
 
-module.exports = { scrapeGoogleMaps, createGroup, saveToDatabase };
+module.exports = {
+  scrapeGoogleMaps,
+  createGroup,
+  rescrapeSelection,
+  saveToDatabase,
+};

@@ -84,45 +84,8 @@ if (isset($_POST['simpanAkun'])) {
               }, 3000);
             </script>";
     }
-}
-
-// ELSEIF DEFAULT
-elseif (isset($_GET['t'])) {
-    if ($_GET['t'] == 'edit') {
-        $id = $_GET['id'];
-        //ambil data laporan
-        $q = mysqli_query($koneksi, "SELECT judul,tipe,tahun,pembimbing_1,pembimbing_2,ketua_penguji,sekretaris,penguji1,penguji2,penguji3,nama_file  FROM pustaka_1 WHERE id='$id'");
-        $d = mysqli_fetch_row($q);
-        $judul = $d[0];
-        $tipe = $d[1];
-        $tahun = $d[2];
-        $pembimbing1 = $d[3];
-        $pembimbing2 = $d[4];
-        $ketua_penguji = $d[5];
-        $sekretaris = $d[6];
-        $penguji1 = $d[7];
-        $penguji2 = $d[8];
-        $penguji3 = $d[9];
-        $nama_file = $d[10];
-
-        $nama_form = "form_pustaka_edit";
-        $tombol_val = "edit";
-    }
 } else {
-    $id = "";
-    $judul = "";
-    $tipe = "";
-    $tahun = "";
-    $pembimbing1 = "";
-    $pembimbing2 = "";
-    $ketua_penguji = "";
-    $penguji1 = "";
-    $penguji2 = "";
-    $penguji3 = "";
-    $sekretaris = "";
-    $cardHeader = "Tambah";
     $tombol_val = "simpan";
-    $nama_form = "form_pustaka";
 }
 ?>
 <!DOCTYPE html>
@@ -359,7 +322,7 @@ elseif (isset($_GET['t'])) {
 </head>
 
 <body>
-    <div id="loading-screen" style="display: block;">
+    <div id="loading-screen" style="display: none;">
         <div class="loading-wrapper">
             <div class="circle-loader">
                 <div class="status draw"></div>
