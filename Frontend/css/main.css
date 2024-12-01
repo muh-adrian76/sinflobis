@@ -17,6 +17,10 @@
   );
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 .circle-loader {
   margin: 0 0 30px 10px;
   border: var(--symbol-thickness) solid rgba(0, 0, 0, 0.2);
@@ -291,6 +295,6 @@
   margin-left: 20px;
 }
 
-tbody#tabel-lokasi td:not(:last-child) {
-  text-align: start;
+tbody#tabel-lokasi td:not(:first-child) {
+  text-align: start !important;
 }

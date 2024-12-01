@@ -83,6 +83,24 @@ if (isset($_POST['simpanAkun'])) {
                 window.location.replace('scrape.php');
             }, 3000);
           </script>";
+  } elseif (!empty($namaAkun)) {
+    mysqli_query($koneksi, "UPDATE login SET nama='$namaAkun' WHERE username='$user' OR telepon='$user'");
+    echo '<div class="alert alert-success" style="
+            max-width: 50%;
+            z-index: 999999999999;
+            margin: auto;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            text-align:center;
+            transform: translateX(-50%);
+            "><strong>Berhasil</strong> mengubah profil.</div>';
+    echo "<script>
+              setTimeout(function() {
+                  window.location.replace('scrape.php');
+              }, 3000);
+            </script>";
+    $tombol_val = "simpan";
   }
 } else {
   $tombol_val = "simpan";
@@ -178,22 +196,23 @@ if (isset($_POST["hapusLokasi"])) {
             '</select> baris data'
         },
         columnDefs: [{
-            targets: [5],
+            targets: [5, 6],
             orderable: false
           } // Disable ordering for the first column (index 0)
         ]
       });
-      $('<button id="refresh-scrape" style="margin-top: 1.05rem;" class="btn btn-warning"><i class="bx bx-reset me-1"></i> Perbarui Data Scraping</button>').appendTo('.refresh-scrape');
+      $('<button id="refresh-scrape" style="margin: 1.05rem" class="btn btn-warning"><i class="bx bx-reset me-1"></i> Perbarui Data Scraping</button>').appendTo('.refresh-scrape');
+      $('.refresh-scrape').addClass('d-flex justify-content-center');
 
       $('#search').on('keyup', function() {
         table.search(this.value).draw();
       });
       // modal delete
-      $("#formHapus").on('submit', function(event) {
-        event.preventDefault();
-      });
       $("tbody a:nth-child(1)").click(function() {
-        lokasi = $(this).attr('href'); // untuk variable nim dari attribut href
+        $("#formHapus").on('submit', function(event) {
+          event.preventDefault();
+        });
+        lokasi = $(this).attr('href');
         $(".modal-title.delete").text("Konfirmasi Hapus");
         $(".modal-body.delete").html("Apakah anda yakin ingin menghapus<br><strong>" + lokasi + "</strong> ?");
 
@@ -253,7 +272,7 @@ if (isset($_POST["hapusLokasi"])) {
         const checkbox = $('#defaultCheck1').prop('checked');
 
         $.ajax({
-          url: 'http://localhost:3000/scrape',
+          url: 'http://localhost:3000/scrapes',
           type: 'POST',
           contentType: 'application/json',
           data: JSON.stringify({
@@ -317,7 +336,7 @@ if (isset($_POST["hapusLokasi"])) {
         $('#loading-screen').fadeIn('slow');
 
         $.ajax({
-          url: 'http://localhost:3000/rescrape',
+          url: 'http://localhost:3000/rescrapes',
           type: 'POST',
           contentType: 'application/json',
           data: JSON.stringify({
@@ -618,7 +637,7 @@ if (isset($_POST["hapusLokasi"])) {
               <div class="navbar-nav align-items-center">
                 <div class="nav-item d-flex align-items-center" id="datatable_filter">
                   <i class="bx bx-search fs-4 lh-0"></i>
-                  <input type="text" id="search" class="form-control border-0 shadow-none" placeholder="Cari Data Tabel Rest Area" aria-label="Cari Data Tabel Rest Area" aria-controls="datatable" />
+                  <input type="text" id="search" class="form-control border-0 shadow-none" placeholder="Cari Data Tabel Lokasi" aria-label="Cari Data Tabel Lokasi" aria-controls="datatable" />
                 </div>
               </div>
               <!-- /Search -->
@@ -668,7 +687,7 @@ if (isset($_POST["hapusLokasi"])) {
         <div class="content-wrapper">
           <!-- Content -->
           <div class="container-xxl flex-grow-1 container-p-y" style="text-align: center !important;">
-            <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Form</span> Scraping</h4>
+            <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Form</span> Scraping Lokasi</h4>
 
             <!-- Basic Layout & Basic with Icons -->
             <div class="row">
@@ -676,8 +695,7 @@ if (isset($_POST["hapusLokasi"])) {
               <div class="col-xxl">
                 <div class="card">
                   <div class="card-header d-flex align-items-center justify-content-center">
-                    <h5 class="mb-0">Tambah Data Rest Area</h5>
-
+                    <!-- <h5 class="mb-0">Tambah Data Lokasi</h5> -->
                   </div>
                   <div class="card-body">
                     <form id="scrape-form">
@@ -685,7 +703,7 @@ if (isset($_POST["hapusLokasi"])) {
                         <label class="col-lg-2 col-form-label" for="query">Nama</label>
                         <div class="col-lg-8 mb-3 input-group input-group-merge textarea-input" style="box-shadow: none;">
                           <span id="basic-icon-default-fullname2" class="input-group-text"><i class='bx bx-map'></i></span>
-                          <textarea class="form-control" type="text" id="query" name="query" rows="1" placeholder="Masukkan nama rest area" required></textarea>
+                          <textarea class="form-control" type="text" id="query" name="query" rows="1" placeholder="Masukkan nama lokasi" required></textarea>
                         </div>
                         <div class="col-lg-2">
                           <button type="button" class="btn btn-outline-warning mx-auto wow fadeIn" data-bs-toggle="offcanvas"
@@ -694,7 +712,7 @@ if (isset($_POST["hapusLokasi"])) {
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label class="col-lg-2 col-form-label" for="group">Grup (Opsional)</label>
+                        <label class="col-lg-2 col-form-label" for="group">Grup<!-- (Opsional)--></label>
                         <div class="col-lg-8 mb-3 input-group input-group-merge textarea-input" style="box-shadow: none;">
                           <span id="basic-icon-default-fullname2" class="input-group-text"><i class='bx bxs-group'></i></span>
                           <input class="form-control" type="text" id="group" name="group[]" placeholder="Masukkan nama grup" />
@@ -722,10 +740,10 @@ if (isset($_POST["hapusLokasi"])) {
             </div>
           </div>
 
-          <div class="container-xxl flex-grow-1 container-p-y" style="text-align: center !important;">
+          <div class="container-xxl flex-grow-1 container-p-y">
 
             <hr class="my-4" />
-            <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tabel</span> Rest Area</h4>
+            <h4 class="fw-bold py-3 mb-4 text-center"><span class="text-muted fw-light">Tabel</span> Lokasi</h4>
 
             <!-- Hoverable Table rows -->
             <div class="card overflow-hidden" style="max-height:620px; padding:10px 20px;">
@@ -733,15 +751,16 @@ if (isset($_POST["hapusLokasi"])) {
                 <table class="table table-hover" id="datatable">
                   <thead>
                     <tr>
+                      <th class="dt-head-center sorting" scope="col">No.</th>
                       <th class="dt-head-center sorting" scope="col">Nama</th>
                       <th class="dt-head-center sorting" scope="col">Grup</th>
                       <th class="dt-head-center sorting" scope="col">Latitude</th>
                       <th class="dt-head-center sorting" scope="col">Longitude</th>
-                      <th class="dt-head-center sorting" scope="col">Diambil Pada</th>
+                      <th class="dt-head-center" scope="col">Diambil Pada</th>
                       <th></th>
                     </tr>
                   </thead>
-                  <tbody id="tabel-lokasi" class="table-border-bottom-0">
+                  <tbody class="table-border-bottom-0">
                     <?php
                     // ambil data scraping
                     $scraping = mysqli_query($koneksi, "SELECT 
@@ -755,7 +774,8 @@ if (isset($_POST["hapusLokasi"])) {
                                                         LEFT JOIN 
                                                             location_groups lg ON l.grup = lg.id 
                                                         ORDER BY 
-                                                            l.name");
+                                                            l.last_updated");
+                    $no = 1;
                     while ($data_scrap = mysqli_fetch_row($scraping)) {
                       $namaLokasi = $data_scrap[0];
                       $grup = $data_scrap[1];
@@ -767,13 +787,14 @@ if (isset($_POST["hapusLokasi"])) {
 
                       echo "
                           <tr>
+                            <td class='text-center'>$no</td>
                             <td><strong>$namaLokasi</strong></td>
                             <td>$grup</td>
                             <td>$latitude</td>
                             <td>$longitude</td>
                             <td>$formattedDate</td>
-                            <td>
-                                  <a class=\"text-secondary\" 
+                            <td class='text-center'>
+                                  <a class=\"text-danger\" 
                                     href=\"$namaLokasi\"
                                     data-bs-toggle=modal 
                                     data-bs-target=#hapusLokasi>
@@ -781,6 +802,7 @@ if (isset($_POST["hapusLokasi"])) {
                                   </a>
                             </td>
                           </tr>";
+                      $no++;
                     }
                     ?>
                   </tbody>
@@ -909,7 +931,7 @@ if (isset($_POST["hapusLokasi"])) {
                       <div class="modal-header d-flex justify-content-center">
                         <h5 class="modal-title delete" id="modalCenterTitle"></h5>
                       </div>
-                      <div class="modal-body delete"></div>
+                      <div class="modal-body delete" style="text-align: center;"></div>
                       <div class="modal-footer delete d-flex justify-content-center mb-3"></div>
                     </div>
                   </div>
@@ -922,7 +944,7 @@ if (isset($_POST["hapusLokasi"])) {
                         <div class='card-body'>
                           <div class='d-flex flex-column align-items-center'>
                             <div class='d-flex flex-column align-items-center'>
-                              <h4 class='mb-2'>Perbarui Data Rest Area <i class='bx bx-refresh ps-2' style="font-size: 2rem;"></i></h4>
+                              <h4 class='mb-2'>Perbarui Data Lokasi <i class='bx bx-refresh ps-2' style="font-size: 2rem;"></i></h4>
                               <p>Tolong pilih salah satu metode pembaruan dibawah!</p>
                             </div>
                             <form id='rescrape-form' style="width: 70%;">
@@ -935,7 +957,7 @@ if (isset($_POST["hapusLokasi"])) {
                                     name="nama_grup[]"
                                     placeholder="Masukkan Nama Grup"
                                     aria-describedby="floatingInputHelp" />
-                                  <label for="nama_grup[]">Rest Area (Grup)</label>
+                                  <label for="nama_grup[]">Lokasi (Grup)</label>
                                 </div>
                                 <div class="form-floating">
                                   <input
@@ -943,9 +965,9 @@ if (isset($_POST["hapusLokasi"])) {
                                     class="form-control mb-3"
                                     id="nama_lokasi"
                                     name="nama_lokasi[]"
-                                    placeholder="Masukkan Nama Rest Area"
+                                    placeholder="Masukkan Nama Lokasi"
                                     aria-describedby="floatingInputHelp" />
-                                  <label for="nama_lokasi[]">Rest Area (Tunggal)</label>
+                                  <label for="nama_lokasi[]">Lokasi (Tunggal)</label>
                                 </div>
                               </div>
                               <button class='btn btn-warning d-grid w-100' type='submit'>Scrape Ulang</button>

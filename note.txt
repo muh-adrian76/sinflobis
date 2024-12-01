@@ -1,16 +1,20 @@
-*screenshoot
-preview -> carousel
-simpan -> preview
-manual -> multi-input
-form lokasi untuk ambil screenshoot -> multi-input
-simpan db -> tabel jumlah screemnshoot untuk lokasi A,B, dst...
+Copy text berikut pada terminal VSCode untuk mengaktifkan server:
+cd ./sinflobis/backend
+npm run start
 
-*topsis
+*screenshoot
+ekstrak jalan, bedakan warna jalan, bbox
+
+*topsis / waspas
+function merec -> menentukan bobot berdasarkan nama
 form kriteria -> CRUD id, kode, nama, bobot, sifat
 form alternatif -> CRUD id, nama, pilih nilai untuk kriteria
 tabel hasil topsis -> nilai preferensi/peringkat, modal proses topsis (nilai matriks, matriks ternormalisasi, bobot ternormalisasi, matriks idel +/-, jarak solusi ideal +/-) 
 
-waspas
+*hapus dashboard (opsional)
+grafik jam sibuk -> halaman scraping
+welcome card, jumlah data tiap metodologi, shortcut button
+lokasi -> multiple group
 
 Rest Area KM 726B;Rest Area KM 391 A Kendal Jasamarga;Rest Area Kendal "TRAVOY KM 389 B"
 Rest Area KM 360 B Subah - Batang;Rest Area KM 338 A Tol Pekalongan
@@ -19,3 +23,5 @@ Rest Area Km 429 B Tol Ungaran - Bawen;Rest Area KM 429 A Tol Ungaran - Bawen
 Rest Area KM 439A Semarang - Solo;Rest Area KM 487 A Boyolali;Rest Area KM 487 B Boyolali
 
 truncate table locations; truncate table location_groups; truncate table popular_times;
+
+https://docs.google.com/spreadsheets/d/1OxgwVxGhdlKlH4sdmEPqEaGPJlrYynt6Txabpiilg7M/edit?hl=id&gid=435448667#gid=435448667 -> sheet spk topsis

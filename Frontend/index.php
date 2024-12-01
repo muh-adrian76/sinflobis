@@ -263,7 +263,7 @@ if (isset($_POST['lupa_pswd'])) {
             </div>
             <!-- /Logo -->
             <div class="d-flex flex-column align-items-center">
-              <h4 class="mb-2">Sistem Informasi Lokasi Bisnis</h4>
+              <h4 class="mb-2 text-center" style="line-height: 2rem;">Sistem Informasi<br>Penentuan Lokasi Bisnis</h4>
               <p class="mb-4">Tolong masuk ke akun anda terlebih dahulu !</p>
             </div>
             <form id="formAuthentication form1" class="mb-3" action="" method="POST">

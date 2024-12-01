@@ -2,17 +2,20 @@ require("dotenv").config();
 const Hapi = require("@hapi/hapi");
 const Inert = require("@hapi/inert");
 const path = require("path");
+const { exec } = require("child_process");
+
 const ClientError = require("./exceptions/ClientError");
 const {
   scrapeGoogleMaps,
   createGroup,
   rescrapeSelection,
-  saveToDatabase,
+  saveScrape,
 } = require("./script/scraper");
 const {
   takeScreenshot,
   findCoordinate,
   filterGoogleMapsUrl,
+  saveScreenshot,
 } = require("./script/screenshoot");
 
 const init = async () => {
@@ -38,7 +41,7 @@ const init = async () => {
 
   server.route({
     method: "POST",
-    path: "/scrape",
+    path: "/scrapes",
     handler: async (request, h) => {
       const { query, group, checkbox } = request.payload;
       let groupId;
@@ -66,7 +69,7 @@ const init = async () => {
             Array.isArray(popularTimesData) &&
             popularTimesData.length === 168
           ) {
-            await saveToDatabase(locationData, groupId, popularTimesData);
+            await saveScrape(locationData, groupId, popularTimesData);
             results.push({
               berhasil: `${singleQuery} : <strong>tidak terdapat <i>missing values</i></strong>`,
               locationData,
@@ -75,7 +78,7 @@ const init = async () => {
           } else {
             missingValues = 168 - popularTimesData.length;
             if (checkbox) {
-              await saveToDatabase(locationData, groupId, popularTimesData);
+              await saveScrape(locationData, groupId, popularTimesData);
               results.push({
                 berhasil: `${singleQuery} : <strong>terdapat ${missingValues} <i>missing values</i></strong>`,
                 locationData,
@@ -92,15 +95,16 @@ const init = async () => {
           results.push({ gagal: popularTimesData });
         }
       }
+      console.log("Scraping selesai!");
       return h.response({ status: "success", data: results }).code(201);
     },
   });
 
   server.route({
     method: "POST",
-    path: "/rescrape",
+    path: "/rescrapes",
     handler: async (request, h) => {
-      const { query = "", group = "" } = request.payload;
+      const { query, group } = request.payload;
       const normalizedQuery = query.replace(/[;,]/g, "\n");
       const newQuery = normalizedQuery
         .split("\n")
@@ -109,8 +113,9 @@ const init = async () => {
       const groupId = await createGroup(group);
       const results = [];
 
+      // console.log(newQuery, groupId);
       const queries = await rescrapeSelection(newQuery, groupId);
-
+      // console.log(queries);
       for (const singleQuery of queries) {
         const { locationData, popularTimesData } = await scrapeGoogleMaps(
           singleQuery
@@ -123,7 +128,7 @@ const init = async () => {
             Array.isArray(popularTimesData) &&
             popularTimesData.length === 168
           ) {
-            await saveToDatabase(locationData, groupId, popularTimesData);
+            await saveScrape(locationData, groupId, popularTimesData);
             results.push({
               berhasil: `${singleQuery} : <strong>tidak terdapat <i>missing values</i></strong>`,
               locationData,
@@ -132,7 +137,7 @@ const init = async () => {
           } else {
             missingValues = 168 - popularTimesData.length;
             // if (checkbox) {
-            await saveToDatabase(locationData, groupId, popularTimesData);
+            await saveScrape(locationData, groupId, popularTimesData);
             results.push({
               berhasil: `${singleQuery} : <strong>terdapat ${missingValues} <i>missing values</i></strong>`,
               locationData,
@@ -149,80 +154,239 @@ const init = async () => {
           results.push({ gagal: popularTimesData });
         }
       }
+      console.log("Re-Scrape berhasil!");
+
       return h.response({ status: "success", data: results }).code(201);
     },
   });
 
-  server.route({
-    method: "POST",
-    path: "/typical",
-    handler: async (request, h) => {
-      const { nama, hari, waktu } = request.payload;
-      const { latitude, longitude } = await findCoordinate(nama);
-      if (!latitude || !longitude || !hari || !waktu) {
-        return h.response("Data screenshoot belum lengkap.").code(400);
-      }
-      try {
-        const screenshotPath = await takeScreenshot(
-          nama,
-          latitude,
-          longitude,
-          hari,
-          waktu
-        );
-        console.log("Berhasil menyimpan screenshoot");
-        return h.file(screenshotPath).type("image/png");
-      } catch (error) {
-        console.error(error);
-        return h.response("Error taking screenshot").code(500);
-      }
-    },
-  });
+  // server.route({
+  //   method: "POST",
+  //   path: "/typical",
+  //   handler: async (request, h) => {
+  //     const { nama, hari, waktu } = request.payload;
+  //     const { latitude, longitude } = await findCoordinate(nama);
+  //     if (!latitude || !longitude || !hari || !waktu) {
+  //       return h.response("Data screenshoot belum lengkap.").code(400);
+  //     }
+  //     try {
+  //       const screenshotPath = await takeScreenshot(
+  //         nama,
+  //         latitude,
+  //         longitude,
+  //         hari,
+  //         waktu
+  //       );
+  //       console.log("Berhasil menyimpan screenshoot");
+  //       return h.file(screenshotPath).type("image/png");
+  //     } catch (error) {
+  //       console.error(error);
+  //       return h.response("Error taking screenshot").code(500);
+  //     }
+  //   },
+  // });
+
+  // server.route({
+  //   method: "POST",
+  //   path: "/live",
+  //   handler: async (request, h) => {
+  //     const { nama } = request.payload;
+  //     const { latitude, longitude } = await findCoordinate(nama);
+  //     if (!latitude || !longitude) {
+  //       return h.response("Data screenshoot belum lengkap.").code(400);
+  //     }
+  //     try {
+  //       const screenshotPath = await takeScreenshot(nama, latitude, longitude);
+  //       console.log("Berhasil menyimpan screenshoot");
+  //       return h.file(screenshotPath).type("image/png");
+  //     } catch (error) {
+  //       console.error(error);
+  //       return h.response("Error taking screenshot").code(500);
+  //     }
+  //   },
+  // });
 
   server.route({
     method: "POST",
-    path: "/live",
+    path: "/screenshots/location",
     handler: async (request, h) => {
-      const { nama } = request.payload;
+      const { nama, hari, waktu, type } = request.payload;
       const { latitude, longitude } = await findCoordinate(nama);
       if (!latitude || !longitude) {
         return h.response("Data screenshoot belum lengkap.").code(400);
       }
+      if (type === "typical" && (!hari || !waktu)) {
+        return h.response("Data screenshoot belum lengkap.").code(400);
+      }
       try {
-        const screenshotPath = await takeScreenshot(nama, latitude, longitude);
-        console.log("Berhasil menyimpan screenshoot");
-        return h.file(screenshotPath).type("image/png");
+        const { timestamp, fileName, screenshotPath } =
+          type === "typical"
+            ? await takeScreenshot(nama, latitude, longitude, hari, waktu)
+            : await takeScreenshot(nama, latitude, longitude);
+        let newHari = hari;
+        let newWaktu = waktu;
+        if (type === "live") {
+          const now = new Date();
+          const dayIndex = now.getDay(); // Get the day index (0-6)
+          const dayNames = [
+            "Minggu",
+            "Senin",
+            "Selasa",
+            "Rabu",
+            "Kamis",
+            "Jumat",
+            "Sabtu",
+          ];
+          const dayName = dayNames[dayIndex];
+          newHari = dayName;
+          const findWaktu = screenshotPath.match(/(\d{2}-\d{2}-\d{2})/);
+          newWaktu = findWaktu[0].replaceAll("-", ":");
+        }
+
+        // Python Image Processing
+        const pythonPath =
+          '"C:\\Users\\Marita Prasetyani\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"';
+        const pythonScript = path.join(__dirname, "cv.py");
+        await new Promise((resolve, reject) => {
+          exec(
+            `${pythonPath} ${pythonScript} ${screenshotPath}`,
+            (err, stdout, stderr) => {
+              if (err) {
+                console.error("Error processing image:", stderr);
+                reject(new Error("Image processing failed."));
+              } else {
+                resolve();
+              }
+            }
+          );
+        });
+
+        await saveScreenshot(
+          timestamp,
+          type,
+          nama,
+          newHari,
+          newWaktu,
+          screenshotPath
+        );
+
+        return h
+          .response({
+            jenis: type,
+            nama: nama,
+            hari: newHari,
+            waktu: newWaktu,
+            file: fileName,
+            timestamp: timestamp,
+          })
+          .code(200);
       } catch (error) {
+        const response = `Gagal melakukan screenshot pada lokasi: ${nama}`;
+        console.log(response);
         console.error(error);
-        return h.response("Error taking screenshot").code(500);
+        return h.response(response).code(500);
       }
     },
   });
 
   server.route({
     method: "POST",
-    path: "/manual",
+    path: "/screenshots/url",
     handler: async (request, h) => {
-      const { url } = request.payload;
-      const { latitude, longitude, zoom } = await filterGoogleMapsUrl(url);
-      if (!latitude || !longitude || !zoom) {
-        console.log("Gagal melakukan screenshoot");
+      const { url, hari, waktu, type } = request.payload;
+      const { latitude, longitude, zoom, zoomType } = await filterGoogleMapsUrl(
+        url
+      );
+      if (!latitude || !longitude || !zoom || !zoomType) {
+        return h
+          .response("Gagal melakukan pencarian pada google maps.")
+          .code(400);
+      }
+      if (type === "typical" && (!hari || !waktu)) {
         return h.response("Data screenshoot belum lengkap.").code(400);
       }
       try {
-        const screenshotPath = await takeScreenshot(
-          "manual",
-          latitude,
-          longitude,
-          false,
-          false,
-          zoom
+        const { timestamp, fileName, screenshotPath } =
+          type === "typical"
+            ? await takeScreenshot(
+                "manual",
+                latitude,
+                longitude,
+                hari,
+                waktu,
+                zoom,
+                zoomType
+              )
+            : await takeScreenshot(
+                "manual",
+                latitude,
+                longitude,
+                false,
+                false,
+                zoom,
+                zoomType
+              );
+        let newUrl = url;
+        let newHari = hari;
+        let newWaktu = waktu;
+        newUrl = `Koordinat ${url.split("@")[1].split("/")[0]}`;
+        if (type === "live") {
+          const now = new Date();
+          const dayIndex = now.getDay(); // Get the day index (0-6)
+          const dayNames = [
+            "Minggu",
+            "Senin",
+            "Selasa",
+            "Rabu",
+            "Kamis",
+            "Jumat",
+            "Sabtu",
+          ];
+          const dayName = dayNames[dayIndex];
+          newHari = dayName;
+          const findWaktu = screenshotPath.match(/(\d{2}-\d{2}-\d{2})/);
+          newWaktu = findWaktu[0].replaceAll("-", ":");
+        }
+
+        // Python Image Processing
+        const pythonScript = path.join(__dirname, "cv.py");
+        await new Promise((resolve, reject) => {
+          exec(
+            `python ${pythonScript} ${screenshotPath}`,
+            (err, stdout, stderr) => {
+              if (err) {
+                console.error("Error processing image:", stderr);
+                reject(new Error("Image processing failed."));
+              } else {
+                resolve();
+              }
+            }
+          );
+        });
+
+        await saveScreenshot(
+          timestamp,
+          type,
+          newUrl,
+          newHari,
+          newWaktu,
+          screenshotPath
         );
-        console.log("Berhasil menyimpan screenshoot");
-        return h.file(screenshotPath).type("image/png");
+        return h
+          .response({
+            jenis: type,
+            nama: newUrl,
+            hari: newHari,
+            waktu: newWaktu,
+            file: fileName,
+            timestamp: timestamp,
+          })
+          .code(200);
       } catch (error) {
+        const response = `Gagal melakukan screenshot pada link: ${url}`;
+        console.log(response);
         console.error(error);
-        return h.response("Error taking screenshot").code(500);
+        return h.response(response).code(500);
       }
     },
   });

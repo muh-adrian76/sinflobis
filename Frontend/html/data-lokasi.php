@@ -3,6 +3,8 @@ include "../class.php";
 $sinflobis = new sinflobis;
 $koneksi = $sinflobis->koneksi();
 
+$data = json_decode(file_get_contents('php://input'), true);
+
 if (isset($_POST['nama'])) {
     $nama = $_POST['nama'];
     $data = [];
@@ -67,4 +69,29 @@ if (isset($_GET['group'])) {
     mysqli_close($koneksi);
     header('Content-Type: application/json');
     echo json_encode($groups);
+}
+
+if (isset($_GET['screenshot'])) {
+    $screenshot = mysqli_query($koneksi, "SELECT nama, jenis, hari, waktu, url, timestamp FROM pictures ORDER BY timestamp DESC");
+    $dataArray = [];
+    while ($data = mysqli_fetch_assoc($screenshot)) {
+        $dataArray[] = $data;
+    }
+    mysqli_close($koneksi);
+    header('Content-Type: application/json');
+    echo json_encode($dataArray);
+}
+
+if (isset($data['gambar'])) {
+    $gambar = $data['gambar'];
+    $q = mysqli_query($koneksi, "SELECT timestamp, nama, url FROM pictures WHERE timestamp='$gambar'");
+    $dataArray = [];
+    if (mysqli_num_rows($q) > 0) {
+        while ($row = mysqli_fetch_assoc($q)) {
+            $dataArray[] = $row;
+        }
+    }
+    mysqli_close($koneksi);
+    header('Content-Type: application/json');
+    echo json_encode($dataArray);
 }

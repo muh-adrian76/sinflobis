@@ -83,6 +83,24 @@ if (isset($_POST['simpanAkun'])) {
                   window.location.replace('waspas.php');
               }, 3000);
             </script>";
+    } elseif (!empty($namaAkun)) {
+        mysqli_query($koneksi, "UPDATE login SET nama='$namaAkun' WHERE username='$user' OR telepon='$user'");
+        echo '<div class="alert alert-success" style="
+                max-width: 50%;
+                z-index: 999999999999;
+                margin: auto;
+                position: absolute;
+                top: 10px;
+                left: 50%;
+                text-align:center;
+                transform: translateX(-50%);
+                "><strong>Berhasil</strong> mengubah profil.</div>';
+        echo "<script>
+                  setTimeout(function() {
+                      window.location.replace('scrape.php');
+                  }, 3000);
+                </script>";
+        $tombol_val = "simpan";
     }
 } else {
     $tombol_val = "simpan";

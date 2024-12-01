@@ -103,6 +103,24 @@ if (isset($_POST['simpanAkun'])) {
                 window.location.replace('index.php');
             }, 3000);
           </script>";
+  } elseif (!empty($namaAkun)) {
+    mysqli_query($koneksi, "UPDATE login SET nama='$namaAkun' WHERE username='$user' OR telepon='$user'");
+    echo '<div class="alert alert-success" style="
+            max-width: 50%;
+            z-index: 999999999999;
+            margin: auto;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            text-align:center;
+            transform: translateX(-50%);
+            "><strong>Berhasil</strong> mengubah profil.</div>';
+    echo "<script>
+              setTimeout(function() {
+                  window.location.replace('scrape.php');
+              }, 3000);
+            </script>";
+    $tombol_val = "simpan";
   }
 
   // mysqli_query($koneksi, "ALTER TABLE pustaka_1 DROP id");
@@ -798,7 +816,7 @@ if (isset($_POST['simpanAkun'])) {
                 <div class="nav-item d-flex align-items-center">
                   <div>
                     <h5 class="mb-0"><strong>Dashboard</strong></h5>
-                    <small class="logo">Sistem Informasi Lokasi Bisnis</small>
+                    <small class="logo">Sistem Informasi Penentuan Lokasi Bisnis</small>
                   </div>
                 </div>
               </div>
@@ -854,7 +872,7 @@ if (isset($_POST['simpanAkun'])) {
                 <div class="card">
                   <div class="row card-body" style="text-align: center;padding-right: 0;">
                     <div class="col" style="padding-right: 2.5rem;">
-                      <h4 class="card-title"><b>Grafik Jam Sibuk</b> <i class='bx bx-time text-warning' style="font-size: 1.5rem;"></i></h4>
+                      <h4 class="card-title"><b>Jam Sibuk</b> <i class='bx bx-time text-warning' style="font-size: 1.5rem;"></i></h4>
                       <div id="defaultFormControlHelp" class="form-text">
                         <i>Tingkat kesibukan dalam satuan (%)</i>
                       </div>

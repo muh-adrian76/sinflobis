@@ -4,32 +4,32 @@ const puppeteer = require("puppeteer");
 const mysql = require("mysql2/promise");
 
 const scrapeGoogleMaps = async (query) => {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
   await page.setUserAgent(
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36"
   );
   const url = "https://www.google.com/maps/";
 
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   await page.setViewport({ width: 1600, height: 900 });
   await page.goto(url, {
     waitUntil: "networkidle2",
   });
 
-  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-  await page.waitForSelector(".searchboxinput", { timeout: 30000 });
+  await page.waitForSelector(".searchboxinput", { timeout: 60000 });
   await page.type(".searchboxinput", query);
   await page.waitForSelector('div[data-index="0"]', { timeout: 10000 });
   const firstSuggestion = await page.$('div[data-index="0"]');
   if (firstSuggestion) {
+    await delay(2000);
     await firstSuggestion.click();
   } else {
     throw new Error("No autocomplete suggestions found.");
   }
 
   await page.waitForSelector('div[role="main"]', {
-    timeout: 10000,
+    timeout: 60000,
   });
   await delay(5000);
   let jamSibuk;
@@ -74,7 +74,7 @@ const scrapeGoogleMaps = async (query) => {
   }
 
   const locationData = await page.evaluate(() => {
-    const name = document.querySelector("h1").textContent;
+    const name = document.querySelector(".lfPIob").textContent;
     const url = window.location.href;
     const match = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (match) {
@@ -197,7 +197,7 @@ const rescrapeSelection = async (query, groupId) => {
 
   try {
     let queries = [];
-    if (groupId) {
+    if (groupId !== undefined) {
       const [locations] = await connection.execute(
         "SELECT name FROM locations WHERE grup = ?",
         [groupId]
@@ -207,7 +207,7 @@ const rescrapeSelection = async (query, groupId) => {
       queries = locations.map((location) => location.name);
     }
 
-    if (query) {
+    if (query.length > 0) {
       if (!queries.includes(query)) {
         queries.push(query);
       }
@@ -222,7 +222,7 @@ const rescrapeSelection = async (query, groupId) => {
   }
 };
 
-const saveToDatabase = async (locationData, groupId, popularTimesData) => {
+const saveScrape = async (locationData, groupId, popularTimesData) => {
   const connection = await mysql.createConnection({
     user: process.env.MYSQL_USER,
     host: process.env.MYSQL_HOST,
@@ -311,5 +311,5 @@ module.exports = {
   scrapeGoogleMaps,
   createGroup,
   rescrapeSelection,
-  saveToDatabase,
+  saveScrape,
 };
