@@ -94,6 +94,7 @@ const takeScreenshot = async (
   const traffic = await page.$("div.uSxocb");
   if (traffic) {
     await traffic.click(); // Click the traffic button
+    await layer.click();
   } else {
     throw new Error("No traffic found.");
   }

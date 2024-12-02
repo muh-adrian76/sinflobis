@@ -58,8 +58,8 @@ for rank, (area, contour) in enumerate(traffic_data, start=1):
     aspect_ratio = w / h if h != 0 else 0
     if aspect_ratio < 0.2 or aspect_ratio > 5:  # Mengabaikan bentuk yang sangat sempit atau persegi
         continue
-    cv2.rectangle(img, (x, y), (x + w, y + h), (255, 255, 0), 2)  # Menggambar kotak di sekitar kontur
-    cv2.putText(img, f"{rank}", (x, y - 10), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2)  # Menambahkan nomor peringkat
+    cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)  # Menggambar kotak di sekitar kontur
+    cv2.putText(img, f"{rank}", (x, y - 10), cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 0, 0), 2)  # Menambahkan nomor peringkat
 
 # Mengonversi gambar ke format RGB untuk ditampilkan dengan matplotlib
 result_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -69,5 +69,5 @@ plt.figure(figsize=(16, 9))
 plt.imshow(result_img)
 plt.axis('off')
 # plt.title('Traffic Levels Detected')
-plt.savefig(image_path, bbox_inches="tight", dpi=300)  # Simpan plot ke file
+plt.savefig(image_path, bbox_inches="tight", dpi=400)  # Simpan plot ke file
 plt.close()

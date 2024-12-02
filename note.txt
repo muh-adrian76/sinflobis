@@ -1,6 +1,7 @@
 Copy text berikut pada terminal VSCode untuk mengaktifkan server:
 cd ./sinflobis/backend
 npm run start
+*tunggu hingga muncul pesan Server running ...
 
 *screenshoot
 ekstrak jalan, bedakan warna jalan, bbox
@@ -10,6 +11,7 @@ function merec -> menentukan bobot berdasarkan nama
 form kriteria -> CRUD id, kode, nama, bobot, sifat
 form alternatif -> CRUD id, nama, pilih nilai untuk kriteria
 tabel hasil topsis -> nilai preferensi/peringkat, modal proses topsis (nilai matriks, matriks ternormalisasi, bobot ternormalisasi, matriks idel +/-, jarak solusi ideal +/-) 
+export hasil -> pdf
 
 *hapus dashboard (opsional)
 grafik jam sibuk -> halaman scraping

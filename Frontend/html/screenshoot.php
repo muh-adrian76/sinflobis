@@ -255,10 +255,10 @@ if (isset($_POST["hapusGambar"])) {
             const additionalRow = `
             <div class="row mb-3" id="additional-row">
               <div class="col-lg-1"></div>
-                <label class="col-lg-1 col-form-label" for="hari">Hari</label>
+                <label class="col-lg-1 col-form-label text-center" for="hari">Hari</label>
                 <div class="col-lg-4 mb-3 input-group input-group-merge textarea-input" style="box-shadow: none;">
                   <span id="basic-icon-default-fullname3" class="input-group-text"><i class='bx bx-calendar' ></i></span>
-                  <select class="form-select" id="hari" name="hari">
+                  <select class="form-select" id="hari" name="hari" required>
                       <option selected>Senin</option>
                       <option>Selasa</option>
                       <option>Rabu</option>
@@ -268,7 +268,7 @@ if (isset($_POST["hapusGambar"])) {
                       <option>Minggu</option>
                     </select>
                 </div>
-                <label class="col-lg-1 col-form-label" for="waktu">Pukul</label>
+                <label class="col-lg-1 col-form-label text-center" for="waktu">Pukul</label>
                 <div class="col-lg-4 mb-3 input-group input-group-merge" style="box-shadow: none;">
                   <span id="basic-icon-default-fullname4" class="input-group-text"><i class='bx bx-time'></i></span>
                   <input type="text" class="form-control" id="waktu" name="waktu" placeholder="06:00 hingga 22:00" maxlength="5" required>
@@ -293,10 +293,10 @@ if (isset($_POST["hapusGambar"])) {
             const additionalRow = `
             <div class="row mb-3" id="additional-row_manual">
               <div class="col-lg-1"></div>
-              <label class="col-lg-1 col-form-label" for="hari_manual">Hari</label>
+              <label class="col-lg-1 col-form-label text-center" for="hari_manual">Hari</label>
               <div class="col-lg-4 mb-3 input-group input-group-merge textarea-input" style="box-shadow: none;">
                 <span id="basic-icon-default-fullname3" class="input-group-text"><i class='bx bx-calendar' ></i></span>
-                <select class="form-select" id="hari_manual" name="hari_manual">
+                <select class="form-select" id="hari_manual" name="hari_manual" required>
                     <option selected>Senin</option>
                     <option>Selasa</option>
                     <option>Rabu</option>
@@ -306,7 +306,7 @@ if (isset($_POST["hapusGambar"])) {
                     <option>Minggu</option>
                   </select>
               </div>
-              <label class="col-lg-1 col-form-label" for="waktu_manual">Pukul</label>
+              <label class="col-lg-1 col-form-label text-center" for="waktu_manual">Pukul</label>
               <div class="col-lg-4 mb-3 input-group input-group-merge" style="box-shadow: none;">
                 <span id="basic-icon-default-fullname4" class="input-group-text"><i class='bx bx-time'></i></span>
                   <input type="text" class="form-control" id="waktu_manual" name="waktu_manual" placeholder="06:00 hingga 22:00" maxlength="5" required>
@@ -393,7 +393,11 @@ if (isset($_POST["hapusGambar"])) {
               }, 1000);
             }, 2000);
             const fileDir = `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${response.file}`;
-            const imgElement = `<img src="${fileDir}" alt="Screenshot Trafik" style="max-width: 100%; height: auto;">`;
+            const imgElement = `
+              <div id="magnify">
+                <img src="${fileDir}" id="screenshot-trafik" alt="Screenshot Trafik" style="max-width: 100%; height: auto;">
+              </div>
+            `;
             $('#preview-canvas').html(imgElement);
             $('#query').empty();
             $('#waktu').empty();
@@ -483,10 +487,16 @@ if (isset($_POST["hapusGambar"])) {
               }, 1000);
             }, 2000);
             const fileDir = `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${response.file}`;
-            const imgElement = `<img src="${fileDir}" alt="Screenshot Trafik" style="max-width: 100%; height: auto;">`;
+            const imgElement = `
+              <div id="magnify">
+                <img src="${fileDir}" id="screenshot-trafik" alt="Screenshot Trafik" style="max-width: 100%; height: auto;">
+              </div>`;
             $('#preview-canvas-manual').html(imgElement);
             $('#link').empty();
             $('#waktu_manual').empty();
+            $('#screenshot-trafik').on('load', function() {
+              magnify("screenshot-trafik", 3);
+            });
           },
           error: function(error) {
             console.error('Pesan:', error);
@@ -548,7 +558,10 @@ if (isset($_POST["hapusGambar"])) {
             $('#preview-canvas-manual-description h6').text(`Waktu Pengambilan Gambar: ${changeDescFormat(data.timestamp)}`);
             const fileName = data.url.split('\\').pop();
             const fileDir = `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${fileName}`;
-            const imgElement = `<img src="${fileDir}" alt="Screenshot Trafik" style="max-width: 100%; height: auto;">`;
+            const imgElement = `
+              <div id="magnify">
+                <img src="${fileDir}" id="screenshot-trafik" alt="Screenshot Trafik" style="max-width: 100%; height: auto;">
+              </div>`;
             $('#preview-canvas-manual').html(imgElement);
             $('#preview-canvas').html(imgElement);
           },
@@ -557,6 +570,8 @@ if (isset($_POST["hapusGambar"])) {
           }
         })
       });
+
+      // zoom image on hover
 
       function changeDescFormat(timestamp) {
         const date = new Date(timestamp);
@@ -686,13 +701,15 @@ if (isset($_POST["hapusGambar"])) {
           </li>
 
           <li class="menu-item">
-            <a href="topsis.php" class="menu-link">
+            <a href="topsis.php" class="nav-link disabled">
+              <!-- <a href="topsis.php" class="menu-link"> -->
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/topsis.png" alt="">
               <div data-i18n="Tables">Seleksi TOPSIS</div>
             </a>
           </li>
           <li class="menu-item">
-            <a href="waspas.php" class="menu-link">
+            <a href="waspas.php" class="nav-link disabled">
+              <!-- <a href="waspas.php" class="menu-link"> -->
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/waspas.png" alt="">
               <div data-i18n="Tables">Seleksi WASPAS</div>
             </a>
@@ -892,12 +909,12 @@ if (isset($_POST["hapusGambar"])) {
                     <form id="ss-db">
                       <div class="row">
                         <div class="col-lg-1"></div>
-                        <label class="col-lg-1 col-form-label" for="query">Nama</label>
+                        <label class="col-lg-1 col-form-label text-center" for="query">Nama</label>
                         <div class="col-lg-4 mb-3 input-group input-group-merge" style="box-shadow: none;">
                           <span id="basic-icon-default-fullname1" class="input-group-text"><i class='bx bxs-map'></i></span>
                           <input class="form-control" type="text" id="query" name="lokasi[]" placeholder="Masukkan nama lokasi" required />
                         </div>
-                        <label class="col-lg-1 col-form-label" for="trafik">Trafik</label>
+                        <label class="col-lg-1 col-form-label text-center" for="trafik">Trafik</label>
                         <div class="col-lg-4 mb-3 input-group input-group-merge" style="box-shadow: none;">
                           <span id="basic-icon-default-fullname2" class="input-group-text"><i class='bx bxs-car'></i></span>
                           <select class="form-select" id="trafik" name="trafik">
@@ -931,12 +948,12 @@ if (isset($_POST["hapusGambar"])) {
                     <form id="ss-link">
                       <div class="row">
                         <div class="col-lg-1"></div>
-                        <label class="col-lg-1 col-form-label" for="link">Link URL</label>
+                        <label class="col-lg-1 col-form-label text-center" for="link">Link URL</label>
                         <div class="col-lg-4 mb-3 input-group input-group-merge" style="box-shadow: none;">
                           <span id="basic-icon-default-fullname1" class="input-group-text"><i class='bx bx-link'></i></span>
                           <input type="text" id="link" name="link" class="form-control" placeholder="Contoh: https://google.com/maps/@..." required />
                         </div>
-                        <label class="col-lg-1 col-form-label" for="trafik_manual">Trafik</label>
+                        <label class="col-lg-1 col-form-label text-center" for="trafik_manual">Trafik</label>
                         <div class="col-lg-4 mb-3 input-group input-group-merge" style="box-shadow: none;">
                           <span id="basic-icon-default-fullname2" class="input-group-text"><i class='bx bxs-car'></i></span>
                           <select class="form-select" id="trafik_manual" name="trafik_manual">

@@ -525,13 +525,15 @@ if (isset($_POST["hapusLokasi"])) {
           </li>
 
           <li class="menu-item">
-            <a href="topsis.php" class="menu-link">
+            <!-- <a href="topsis.php" class="menu-link"> -->
+            <a href="topsis.php" class="nav-link disabled">
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/topsis.png" alt="">
               <div data-i18n="Tables">Seleksi TOPSIS</div>
             </a>
           </li>
           <li class="menu-item">
-            <a href="waspas.php" class="menu-link">
+            <a href="waspas.php" class="nav-link disabled">
+              <!-- <a href="waspas.php" class="menu-link"> -->
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/waspas.png" alt="">
               <div data-i18n="Tables">Seleksi WASPAS</div>
             </a>
