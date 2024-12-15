@@ -39,6 +39,23 @@ if (isset($_POST['grup'])) {
     echo json_encode($data);
 }
 
+if (isset($_POST['kriteria'])) {
+    $kriteria = $_POST['kriteria'];
+    $data = [];
+    $q = mysqli_query($koneksi, "SELECT id,nama FROM criterias WHERE nama LIKE '%$kriteria%'");
+    while ($d = mysqli_fetch_row($q)) {
+        $label = $d[1];
+        $value = $d[0];
+        $data[] = array('label' => $label, 'value' => $value);
+    }
+    if (empty($data)) {
+        $data[] = array('label' => 'No results found', 'value' => '');
+    }
+    mysqli_close($koneksi);
+    header('Content-Type: application/json');
+    echo json_encode($data);
+}
+
 if (isset($_GET['fetch_location'])) {
     $sql = "SELECT id, name FROM locations";
     $result = mysqli_query($koneksi, $sql);
@@ -90,6 +107,17 @@ if (isset($data['gambar'])) {
         while ($row = mysqli_fetch_assoc($q)) {
             $dataArray[] = $row;
         }
+    }
+    mysqli_close($koneksi);
+    header('Content-Type: application/json');
+    echo json_encode($dataArray);
+}
+
+if (isset($_GET['kriteria'])) {
+    $kriteria = mysqli_query($koneksi, "SELECT * FROM criterias ORDER BY id ASC");
+    $dataArray = [];
+    while ($data = mysqli_fetch_assoc($kriteria)) {
+        $dataArray[] = $data;
     }
     mysqli_close($koneksi);
     header('Content-Type: application/json');

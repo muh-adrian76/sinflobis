@@ -292,7 +292,7 @@ if (isset($_POST["hapusLokasi"])) {
             const maxRows = Math.max(berhasilList.length, gagalList.length);
             for (let i = 0; i < maxRows; i++) {
               const row = $('<tr>');
-              row.append($('<td>').text(i + 1)); // First column: index + 1
+              row.append($("<td class='text-center'>").text(i + 1)); // First column: index + 1
               if (i < berhasilList.length) {
                 row.append($('<td>').html(berhasilList[i])); // Second column: berhasil
               } else {
@@ -355,7 +355,7 @@ if (isset($_POST["hapusLokasi"])) {
             const maxRows = Math.max(berhasilList.length, gagalList.length);
             for (let i = 0; i < maxRows; i++) {
               const row = $('<tr>');
-              row.append($('<td>').text(i + 1)); // First column: index + 1
+              row.append($("<td class='text-center'>").text(i + 1)); // First column: index + 1
               if (i < berhasilList.length) {
                 row.append($('<td>').html(berhasilList[i])); // Second column: berhasil
               } else {
@@ -525,17 +525,9 @@ if (isset($_POST["hapusLokasi"])) {
           </li>
 
           <li class="menu-item">
-            <!-- <a href="topsis.php" class="menu-link"> -->
-            <a href="topsis.php" class="nav-link disabled">
+            <a href="mcdm.php" class="menu-link">
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/topsis.png" alt="">
-              <div data-i18n="Tables">Seleksi TOPSIS</div>
-            </a>
-          </li>
-          <li class="menu-item">
-            <a href="waspas.php" class="nav-link disabled">
-              <!-- <a href="waspas.php" class="menu-link"> -->
-              <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/waspas.png" alt="">
-              <div data-i18n="Tables">Seleksi WASPAS</div>
+              <div data-i18n="Tables">Seleksi Lokasi Terbaik</div>
             </a>
           </li>
         </ul>
@@ -717,10 +709,10 @@ if (isset($_POST["hapusLokasi"])) {
                         <label class="col-lg-2 col-form-label" for="group">Grup<!-- (Opsional)--></label>
                         <div class="col-lg-8 mb-3 input-group input-group-merge textarea-input" style="box-shadow: none;">
                           <span id="basic-icon-default-fullname2" class="input-group-text"><i class='bx bxs-group'></i></span>
-                          <input class="form-control" type="text" id="group" name="group[]" placeholder="Masukkan nama grup" />
+                          <input class="form-control" type="text" id="group" name="group[]" placeholder="Masukkan nama grup" required />
                         </div>
                         <div class="col-lg-2">
-                          <button type="submit" name="tombol" class="btn btn-warning mx-auto" style="width: 123px;">Scrape</button>
+                          <button type="submit" name="tombol" class="btn btn-warning mx-auto"><i class='bx bx-map-pin me-2'></i> Scrape</button>
                         </div>
                       </div>
                       <div class="row">
@@ -776,7 +768,7 @@ if (isset($_POST["hapusLokasi"])) {
                                                         LEFT JOIN 
                                                             location_groups lg ON l.grup = lg.id 
                                                         ORDER BY 
-                                                            l.last_updated");
+                                                            l.last_updated DESC");
                     $no = 1;
                     while ($data_scrap = mysqli_fetch_row($scraping)) {
                       $namaLokasi = $data_scrap[0];

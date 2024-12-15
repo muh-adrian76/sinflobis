@@ -602,6 +602,9 @@ if (isset($_POST["hapusGambar"])) {
           },
           dataType: 'json',
           success: function(response) {
+            if ($.fn.DataTable.isDataTable('#datatable')) {
+              $('#datatable').DataTable().destroy();
+            }
             let tableBody = $('#tableBody');
             tableBody.empty();
             response.forEach((data, index) => {
@@ -635,6 +638,22 @@ if (isset($_POST["hapusGambar"])) {
                             </td>
                         </tr>`;
               tableBody.append(row);
+            });
+            $('#datatable').DataTable({
+              "dom": '<"top"f>rt<"bottom"ilp><"clear">',
+              "language": {
+                "lengthMenu": 'Tampilkan <select>' +
+                  '<option value="10">10</option>' +
+                  '<option value="25">25</option>' +
+                  '<option value="50">50</option>' +
+                  '<option value="100">100</option>' +
+                  '</select> baris data'
+              },
+              columnDefs: [{
+                  targets: [5, 6],
+                  orderable: false
+                } // Disable ordering for the first column (index 0)
+              ]
             });
           },
           error: function(xhr, status, error) {
@@ -701,17 +720,9 @@ if (isset($_POST["hapusGambar"])) {
           </li>
 
           <li class="menu-item">
-            <a href="topsis.php" class="nav-link disabled">
-              <!-- <a href="topsis.php" class="menu-link"> -->
+            <a href="mcdm.php" class="menu-link">
               <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/topsis.png" alt="">
-              <div data-i18n="Tables">Seleksi TOPSIS</div>
-            </a>
-          </li>
-          <li class="menu-item">
-            <a href="waspas.php" class="nav-link disabled">
-              <!-- <a href="waspas.php" class="menu-link"> -->
-              <img class="menu-icon tf-icons me-2" src="../assets/img/icons/unicons/waspas.png" alt="">
-              <div data-i18n="Tables">Seleksi WASPAS</div>
+              <div data-i18n="Tables">Seleksi Lokasi Terbaik</div>
             </a>
           </li>
         </ul>
@@ -984,48 +995,48 @@ if (isset($_POST["hapusGambar"])) {
                 </div>
               </div>
             </div>
+          </div>
 
-            <div class="container-xxl flex-grow-1 container-p-y">
-              <hr class="my-4" />
-              <h4 class="fw-bold py-3 mb-4 text-center"><span class="text-muted fw-light">Tabel Data /</span> Gambar Screenshot</h4>
+          <div class="container-xxl flex-grow-1 container-p-y">
+            <hr class="my-4" />
+            <h4 class="fw-bold py-3 mb-4 text-center"><span class="text-muted fw-light">Tabel</span> Gambar Screenshot</h4>
 
-              <!-- Hoverable Table rows -->
-              <div class="card overflow-hidden" style="max-height:620px; padding:10px 20px;">
-                <div class="table-responsive">
-                  <table class="table table-hover" id="datatable">
-                    <thead>
-                      <tr>
-                        <th class="dt-head-center sorting" scope="col">No.</th>
-                        <th class="dt-head-center sorting" scope="col">Nama</th>
-                        <th class="dt-head-center sorting" scope="col">Jenis</th>
-                        <th class="dt-head-center sorting" scope="col">Hari</th>
-                        <th class="dt-head-center sorting" scope="col">Waktu</th>
-                        <th class="dt-head-center">Diambil Pada</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody class="table-border-bottom-0" id="tableBody">
-                      <?php
-                      // ambil data scraping
-                      $screenshot = mysqli_query($koneksi, "SELECT nama, jenis, hari, waktu, url, timestamp FROM pictures ORDER BY timestamp DESC");
-                      $no = 1;
-                      while ($data = mysqli_fetch_row($screenshot)) {
-                        $nama = $data[0];
-                        $jenis = ucfirst($data[1]);
-                        $hari = $data[2];
-                        $waktu = $data[3] . ' WIB';
-                        $url = $data[4];
-                        $timestamp = $data[5];
-                        $dateTime = new DateTime($timestamp);
-                        $formattedDate = $dateTime->format('H:i:s') . ' WIB, ' . $dateTime->format('d-m-Y');
+            <!-- Hoverable Table rows -->
+            <div class="card overflow-hidden" style="max-height:620px; padding:10px 20px;">
+              <div class="table-responsive">
+                <table class="table table-hover" id="datatable">
+                  <thead>
+                    <tr>
+                      <th class="dt-head-center sorting" scope="col">No.</th>
+                      <th class="dt-head-center sorting" scope="col">Nama</th>
+                      <th class="dt-head-center sorting" scope="col">Jenis</th>
+                      <th class="dt-head-center sorting" scope="col">Hari</th>
+                      <th class="dt-head-center sorting" scope="col">Waktu</th>
+                      <th class="dt-head-center">Diambil Pada</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody class="table-border-bottom-0" id="tableBody">
+                    <?php
+                    $screenshot = mysqli_query($koneksi, "SELECT nama, jenis, hari, waktu, url, timestamp FROM pictures ORDER BY timestamp DESC");
+                    $no = 1;
+                    while ($data = mysqli_fetch_row($screenshot)) {
+                      $nama = $data[0];
+                      $jenis = ucfirst($data[1]);
+                      $hari = $data[2];
+                      $waktu = $data[3] . ' WIB';
+                      $url = $data[4];
+                      $timestamp = $data[5];
+                      $dateTime = new DateTime($timestamp);
+                      $formattedDate = $dateTime->format('H:i:s') . ' WIB, ' . $dateTime->format('d-m-Y');
 
 
-                        if ($jenis == 'Live') {
-                          $badge = '<span class="badge bg-label-primary">' . $jenis . '</span>';
-                        } else {
-                          $badge = '<span class="badge bg-label-info">' . $jenis . '</span>';
-                        }
-                        echo "
+                      if ($jenis == 'Live') {
+                        $badge = '<span class="badge bg-label-primary">' . $jenis . '</span>';
+                      } else {
+                        $badge = '<span class="badge bg-label-info">' . $jenis . '</span>';
+                      }
+                      echo "
                         <tr>
                           <td class='text-center'>$no</td>
                           <td><strong>$nama</strong></td>
@@ -1049,49 +1060,49 @@ if (isset($_POST["hapusGambar"])) {
                             </a>
                           </td>
                         </tr>";
-                        $no++;
-                      }
-                      ?>
-                    </tbody>
-                  </table>
-                </div>
+                      $no++;
+                    }
+                    ?>
+                  </tbody>
+                </table>
               </div>
-              <!--/ Hoverable Table rows -->
             </div>
-
-            <div class="content-backdrop fade"></div>
+            <!--/ Hoverable Table rows -->
           </div>
-          <!-- Content wrapper -->
+
+          <div class="content-backdrop fade"></div>
         </div>
-        <!-- / Layout page -->
+        <!-- Content wrapper -->
       </div>
-
-      <!-- Overlay -->
-      <div class="layout-overlay layout-menu-toggle"></div>
+      <!-- / Layout page -->
     </div>
-    <!-- / Layout wrapper -->
+
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+  <!-- / Layout wrapper -->
 
 
-    <!-- Core JS -->
-    <!-- build:js assets/vendor/js/core.js -->
-    <script src="../assets/vendor/libs/popper/popper.js"></script>
-    <script src="../assets/vendor/js/bootstrap.js"></script>
-    <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+  <script src="../assets/vendor/libs/popper/popper.js"></script>
+  <script src="../assets/vendor/js/bootstrap.js"></script>
+  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 
-    <script src="../assets/vendor/js/menu.js"></script>
-    <!-- endbuild -->
+  <script src="../assets/vendor/js/menu.js"></script>
+  <!-- endbuild -->
 
-    <!-- Vendors JS -->
+  <!-- Vendors JS -->
 
-    <!-- Main JS -->
-    <script src="../assets/js/main.js"></script>
+  <!-- Main JS -->
+  <script src="../assets/js/main.js"></script>
 
-    <!-- Page JS -->
-    <script src="../assets/js/ui-toasts.js"></script>
+  <!-- Page JS -->
+  <script src="../assets/js/ui-toasts.js"></script>
 
-    <!-- Place this tag in your head or just before your close body tag. -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 
 </html>

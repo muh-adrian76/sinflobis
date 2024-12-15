@@ -17,6 +17,14 @@ const {
   filterGoogleMapsUrl,
   saveScreenshot,
 } = require("./script/screenshoot");
+const {
+  saveCriteria,
+  calculateMerec,
+  calculateTopsis,
+  calculateWaspas,
+  generateTopsisPage,
+  generateWaspasPage,
+} = require("./script/seleksi");
 
 const init = async () => {
   const server = Hapi.server({
@@ -156,55 +164,9 @@ const init = async () => {
       }
       console.log("Re-Scrape berhasil!");
 
-      return h.response({ status: "success", data: results }).code(201);
+      return h.response({ status: "success", data: results }).code(200);
     },
   });
-
-  // server.route({
-  //   method: "POST",
-  //   path: "/typical",
-  //   handler: async (request, h) => {
-  //     const { nama, hari, waktu } = request.payload;
-  //     const { latitude, longitude } = await findCoordinate(nama);
-  //     if (!latitude || !longitude || !hari || !waktu) {
-  //       return h.response("Data screenshoot belum lengkap.").code(400);
-  //     }
-  //     try {
-  //       const screenshotPath = await takeScreenshot(
-  //         nama,
-  //         latitude,
-  //         longitude,
-  //         hari,
-  //         waktu
-  //       );
-  //       console.log("Berhasil menyimpan screenshoot");
-  //       return h.file(screenshotPath).type("image/png");
-  //     } catch (error) {
-  //       console.error(error);
-  //       return h.response("Error taking screenshot").code(500);
-  //     }
-  //   },
-  // });
-
-  // server.route({
-  //   method: "POST",
-  //   path: "/live",
-  //   handler: async (request, h) => {
-  //     const { nama } = request.payload;
-  //     const { latitude, longitude } = await findCoordinate(nama);
-  //     if (!latitude || !longitude) {
-  //       return h.response("Data screenshoot belum lengkap.").code(400);
-  //     }
-  //     try {
-  //       const screenshotPath = await takeScreenshot(nama, latitude, longitude);
-  //       console.log("Berhasil menyimpan screenshoot");
-  //       return h.file(screenshotPath).type("image/png");
-  //     } catch (error) {
-  //       console.error(error);
-  //       return h.response("Error taking screenshot").code(500);
-  //     }
-  //   },
-  // });
 
   server.route({
     method: "POST",
@@ -279,7 +241,7 @@ const init = async () => {
             file: fileName,
             timestamp: timestamp,
           })
-          .code(200);
+          .code(201);
       } catch (error) {
         const response = `Gagal melakukan screenshot pada lokasi: ${nama}`;
         console.log(response);
@@ -381,12 +343,164 @@ const init = async () => {
             file: fileName,
             timestamp: timestamp,
           })
-          .code(200);
+          .code(201);
       } catch (error) {
         const response = `Gagal melakukan screenshot pada link: ${url}`;
         console.log(response);
         console.error(error);
         return h.response(response).code(500);
+      }
+    },
+  });
+
+  server.route({
+    method: "POST",
+    path: "/criterias",
+    handler: async (request, h) => {
+      const { nama, sifat, kategori } = request.payload;
+      if (!nama || !sifat || !kategori) {
+        return h.response("Data kriteria belum lengkap.").code(400);
+      }
+      const sifatType = sifat === "0" ? "Benefit" : "Cost";
+      const kategoriType = kategori === "0" ? "Beneficial" : "Non-Beneficial";
+
+      try {
+        const capitalizedName = nama
+          .split(" ")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+        const { criteriaId, simpanType } = await saveCriteria(
+          capitalizedName,
+          sifatType,
+          kategoriType
+        );
+        return h
+          .response({
+            id: criteriaId,
+            nama: capitalizedName,
+            simpan: simpanType,
+          })
+          .code(201);
+      } catch (error) {
+        return h.response(error).code(500);
+      }
+    },
+  });
+
+  server.route({
+    method: "POST",
+    path: "/merec",
+    handler: async (request, h) => {
+      const payload = request.payload;
+
+      if (!Array.isArray(payload)) {
+        console.log("Data matriks tidak valid");
+        return h.response({ error: "Data matriks tidak valid" }).code(400);
+      }
+      const emptyColumn = payload.some((item) => {
+        if (!item.criteria || typeof item.criteria !== "object") return true;
+        return Object.values(item.criteria).some(
+          (value) => value === null || value === undefined || value === ""
+        );
+      });
+      if (emptyColumn) {
+        console.log("Data matriks belum lengkap");
+        return h.response({ error: "Data matriks belum lengkap" }).code(400);
+      }
+
+      const bobot = await calculateMerec(payload);
+
+      const hasInvalidBobot = Object.values(bobot).some(
+        (value) => value === null || isNaN(value)
+      );
+      if (hasInvalidBobot) {
+        console.error("Nilai bobot tidak valid:", bobot);
+        return h
+          .response({
+            error: "Perhitungan bobot gagal karena nilai tidak valid.",
+            details: bobot,
+          })
+          .code(400);
+      }
+      console.log("Bobot yang diperoleh dari metode MEREC:", bobot);
+      return h.response(bobot).code(200);
+    },
+  });
+
+  server.route({
+    method: "POST",
+    path: "/seleksi",
+    handler: async (request, h) => {
+      const { matriks, bobot, metode } = request.payload;
+      // Validate matriks
+      if (!Array.isArray(matriks)) {
+        console.log("Data matriks tidak valid");
+        return h.response({ error: "Data matriks tidak valid" }).code(400);
+      }
+      const emptyColumn = matriks.some((item) => {
+        if (!item.criteria || typeof item.criteria !== "object") return true;
+        return Object.values(item.criteria).some(
+          (value) => value === null || value === undefined || value === ""
+        );
+      });
+      if (emptyColumn) {
+        console.log("Data matriks belum lengkap");
+        return h.response({ error: "Data matriks belum lengkap" }).code(400);
+      }
+      // Validate bobot
+      const hasInvalidBobot = Object.values(bobot).some(
+        (value) => value === null || value === undefined || isNaN(value)
+      );
+      if (hasInvalidBobot) {
+        console.log(
+          "Bobot tidak valid (terdapat nilai null, undefined, or NaN):",
+          bobot
+        );
+        return h
+          .response({
+            error: "Bobot tidak valid (terdapat nilai null, undefined, or NaN)",
+          })
+          .code(400);
+      }
+
+      if (metode === "TOPSIS") {
+        const {
+          topsisMatriks,
+          topsisUpdatedMatrix,
+          topsisNormalizedWeight,
+          solusiIdealPositif,
+          solusiIdealNegatif,
+          euclidean,
+          preference,
+        } = await calculateTopsis(matriks, bobot);
+        const htmlTopsis = await generateTopsisPage(
+          topsisMatriks,
+          bobot,
+          topsisUpdatedMatrix,
+          topsisNormalizedWeight,
+          solusiIdealPositif,
+          solusiIdealNegatif,
+          euclidean,
+          preference
+        );
+        return h.response(htmlTopsis).type("text/html");
+      } else {
+        const {
+          waspasMatriks,
+          normalizedMatrix,
+          wsmMatrix,
+          wpmMatrix,
+          preferenceMatrix,
+        } = await calculateWaspas(matriks, bobot);
+        const htmlWaspas = await generateWaspasPage(
+          waspasMatriks,
+          bobot,
+          normalizedMatrix,
+          wsmMatrix,
+          wpmMatrix,
+          preferenceMatrix
+        );
+        return h.response(htmlWaspas).type("text/html");
       }
     },
   });

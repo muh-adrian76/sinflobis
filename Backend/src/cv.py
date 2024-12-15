@@ -22,7 +22,7 @@ traffic_data = []
 # Mendefinisikan warna-warna untuk klasifikasi kemacetan dalam format RGB, kemudian dikonversi ke HSV
 green_hsv = rgb_to_hsv([17, 214, 143])  # Warna hijau (lalu lintas normal)
 yellow_hsv = rgb_to_hsv([255, 207, 67])  # Warna kuning (sedikit macet)
-orange_hsv = rgb_to_hsv([242, 78, 66])  # Warna oranye (macet)
+orange_hsv = rgb_to_hsv([232, 78, 66])  # Warna oranye (macet)
 red_hsv = rgb_to_hsv([169, 39, 39])  # Warna merah (kemacetan tinggi)
 
 # Menentukan rentang warna HSV dengan toleransi kecil untuk setiap level kemacetan
