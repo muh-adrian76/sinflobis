@@ -22,14 +22,14 @@ traffic_data = []
 # Mendefinisikan warna-warna untuk klasifikasi kemacetan dalam format RGB, kemudian dikonversi ke HSV
 green_hsv = rgb_to_hsv([17, 214, 143])  # Warna hijau (lalu lintas normal)
 yellow_hsv = rgb_to_hsv([255, 207, 67])  # Warna kuning (sedikit macet)
-orange_hsv = rgb_to_hsv([232, 78, 66])  # Warna oranye (macet)
+orange_hsv = rgb_to_hsv([247, 78, 59])  # Warna oranye (macet)
 red_hsv = rgb_to_hsv([169, 39, 39])  # Warna merah (kemacetan tinggi)
 
 # Menentukan rentang warna HSV dengan toleransi kecil untuk setiap level kemacetan
 color_ranges = {
     "Green": (green_hsv - np.array([10, 50, 50]), green_hsv + np.array([10, 50, 50])),
     "Yellow": (yellow_hsv - np.array([10, 50, 50]), yellow_hsv + np.array([10, 50, 50])),
-    "Orange": (orange_hsv - np.array([10, 50, 50]), orange_hsv + np.array([10, 50, 50])),
+    "Orange": (orange_hsv - np.array([10, 100, 100]), orange_hsv + np.array([10, 100, 100])),
     "Red": (red_hsv - np.array([10, 50, 50]), red_hsv + np.array([10, 50, 50])),
 }
 
@@ -45,7 +45,7 @@ for level, (lower, upper) in color_ranges.items():
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # Mencari kontur pada mask
     for contour in contours:
         area = cv2.contourArea(contour)  # Menghitung luas area kontur
-        if area > 25:  # Menyaring area kecil agar tidak dianggap noise
+        if area > 95:  # Menyaring area kecil agar tidak dianggap noise
             traffic_data.append((area, contour))  # Menambahkan data area dan kontur ke list traffic_data
 
 # Mengurutkan data lalu lintas berdasarkan luas area (terbesar ke terkecil)
