@@ -209,7 +209,7 @@ const takeScreenshot = async (
   const hamburger = await page.$('span[jstcache="29"]');
   if (hamburger) {
     await hamburger.click(); // Click the traffic button
-    await delay(2000);
+    await delay(5000);
     const sidebar = await page.$('button[aria-label="Tampilkan sidebar"]');
     if (sidebar) {
       await sidebar.click(); // Click the traffic button
@@ -284,7 +284,8 @@ const saveScreenshot = async (
   nama,
   hari = false,
   waktu = false,
-  url
+  url,
+  koordinat = null
 ) => {
   const connection = await mysql.createConnection({
     user: process.env.MYSQL_USER,
@@ -312,16 +313,16 @@ const saveScreenshot = async (
         }
       });
       await connection.execute(
-        "UPDATE pictures SET timestamp = ?, url= ? WHERE id = ?",
-        [timestamps, url, pictureId]
+        "UPDATE pictures SET timestamp = ?, url= ?, area = ? WHERE id = ?",
+        [timestamps, url, koordinat, pictureId]
       );
       console.log(
         `Berhasil memperbarui gambar ${nama} pada database, ${timestamps}!`
       );
     } else {
       await connection.execute(
-        "INSERT INTO pictures (timestamp, jenis, nama, hari, waktu, url) VALUES (?, ?, ?, ?, ?, ?)",
-        [timestamps, jenis, nama, hari, waktu, url]
+        "INSERT INTO pictures (timestamp, jenis, nama, hari, waktu, url, area) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [timestamps, jenis, nama, hari, waktu, url, koordinat]
       );
       console.log(
         `Berhasil menyimpan gambar ${nama} pada database, ${timestamps}!`
@@ -341,9 +342,53 @@ const saveScreenshot = async (
   }
 };
 
+function calculateCenterPosition(bbox) {
+  const [topLeftX, topLeftY, bottomRightX, bottomRightY] = bbox;
+  const centerX = (topLeftX + bottomRightX) / 2;
+  const centerY = (topLeftY + bottomRightY) / 2;
+  return { centerX, centerY };
+}
+
+const extractCoordinate = async (url, bbox) => {
+  const browser = await puppeteer.launch({ headless: true });
+  const page = await browser.newPage();
+  await page.setUserAgent(
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36"
+  );
+
+  await page.setViewport({ width: 1600, height: 900 });
+
+  await page.goto(url, { waitUntil: "networkidle2" });
+
+  const coordinatesList = [];
+  for (const entry of bbox) {
+    const { position } = entry;
+    const { centerX, centerY } = calculateCenterPosition(position);
+    await page.mouse.move(centerX, centerY);
+    await page.mouse.down({ button: "right" });
+    await page.mouse.up({ button: "right" });
+
+    await page.waitForSelector(".mLuXec", {
+      timeout: 10000,
+    });
+    const koordinat = await page.$eval(
+      ".mLuXec",
+      (element) => element.innerText
+    );
+    coordinatesList.push({
+      rank: entry.rank,
+      koordinat: koordinat,
+    });
+  }
+
+  await browser.close();
+  return coordinatesList;
+};
+
 module.exports = {
   findCoordinate,
   takeScreenshot,
   filterGoogleMapsUrl,
   saveScreenshot,
+  extractCoordinate,
 };

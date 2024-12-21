@@ -230,7 +230,7 @@ if (isset($_POST["hapusKriteria"])) {
 
             // tambah alternatif
             let alternatif = 1;
-            $("button[name='tambahAlternatif']").on('click', function() {
+            $(document).on('click', "button[name='tambahAlternatif']", function() {
                 alternatif += 1;
                 $.ajax({
                     type: "GET",
@@ -341,6 +341,7 @@ if (isset($_POST["hapusKriteria"])) {
                         fetchTableData();
                         addColumnCriteria(response.id);
                         $('#nama').val('');
+                        alternatif = 1;
                     },
                     error: function(error) {
                         console.error('Pesan:', error);
@@ -433,16 +434,18 @@ if (isset($_POST["hapusKriteria"])) {
                                     <label for="judul-matriks"><i>Matriks Keputusan</i></label>
                                 </div>
                             </div>
-                            <div class="input-group alternative_1">
-                                <div class="form-floating">
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        id="alternatif_1"
-                                        name="lokasi[]"
-                                        placeholder="Masukkan Lokasi"
-                                        aria-describedby="floatingInputHelp" />
-                                    <label for="lokasi[]"><b>Alternatif 1</b></label>
+                            <div id="row-alternatives">
+                                <div class="input-group alternatif_1">
+                                    <div class="form-floating">
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="alternatif_1"
+                                            name="lokasi[]"
+                                            placeholder="Masukkan Lokasi"
+                                            aria-describedby="floatingInputHelp" />
+                                        <label for="lokasi[]"><b>Alternatif 1</b></label>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -451,7 +454,7 @@ if (isset($_POST["hapusKriteria"])) {
                             const rowHeader = `<input type='text' value='C${data.id}' class='form-control' style='font-weight:bold;' disabled />`;
                             $("#row-matriks .matriks-header").append(rowHeader);
                             const rowBody = `<input type='text' id='A${alternatif}_C${data.id}' placeholder='A${alternatif}-C${data.id}' class='form-control' required />`;
-                            $("#row-matriks .alternative_1").append(rowBody);
+                            $("#row-matriks .alternatif_1").append(rowBody);
                         });
                     },
                     error: function(error) {
@@ -482,6 +485,7 @@ if (isset($_POST["hapusKriteria"])) {
                     alternatif['criteria'] = criteria;
                     matrix.push(alternatif);
                 });
+                ''
                 // let matrixJSON = JSON.stringify(matrix, null, 4); // Beautified JSON output for readability
                 // console.log(matrixJSON);
 
@@ -521,7 +525,7 @@ if (isset($_POST["hapusKriteria"])) {
 
             // form seleksi
             $("#seleksi").on("submit", function(e) {
-                e.preventDefault(); // agar tidak merefresh halaman
+                e.preventDefault();
                 let matrix = [];
                 $("#row-alternatives .input-group").each(function() {
                     let alternatif = {};
@@ -534,7 +538,7 @@ if (isset($_POST["hapusKriteria"])) {
                     $(this)
                         .find("input[id^='A']")
                         .each(function() {
-                            let criteriaId = $(this).attr("id").split("_")[1]; // Extract C1, C2, etc.
+                            let criteriaId = $(this).attr("id").split("_")[1];
                             let value = $(this).val();
                             criteria[criteriaId] = value;
                         });
@@ -545,15 +549,11 @@ if (isset($_POST["hapusKriteria"])) {
 
                 let bobot = {};
                 $(".matriks-bobot input[id^='bobot_C']").each(function() {
-                    let criteriaId = $(this).attr("id").split("_")[1]; // Extract C1, C2, etc.
+                    let criteriaId = $(this).attr("id").split("_")[1];
                     let value = $(this).val();
                     bobot[criteriaId] = value;
                 });
-
-                // Collect selected radio button value
-                let method = $("input[name='btnradio']:checked").next("label").text(); // Get the label text of the selected radio
-
-                // Combine into a single payload
+                let method = $("input[name='btnradio']:checked").next("label").text();
                 const payload = {
                     matriks: matrix,
                     bobot: bobot,
@@ -967,7 +967,7 @@ if (isset($_POST["hapusKriteria"])) {
                                                     ?>
                                                 </div>
                                                 <div id="row-alternatives">
-                                                    <div class="input-group alternative_1">
+                                                    <div class="input-group alternatif_1">
                                                         <div class="form-floating">
                                                             <input
                                                                 type="text"

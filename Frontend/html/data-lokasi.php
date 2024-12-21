@@ -101,7 +101,7 @@ if (isset($_GET['screenshot'])) {
 
 if (isset($data['gambar'])) {
     $gambar = $data['gambar'];
-    $q = mysqli_query($koneksi, "SELECT timestamp, nama, url FROM pictures WHERE timestamp='$gambar'");
+    $q = mysqli_query($koneksi, "SELECT timestamp, nama, url, area FROM pictures WHERE timestamp='$gambar'");
     $dataArray = [];
     if (mysqli_num_rows($q) > 0) {
         while ($row = mysqli_fetch_assoc($q)) {

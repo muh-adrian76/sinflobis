@@ -2,6 +2,7 @@ import sys
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import json
 
 # Mendapatkan path gambar dari argumen
 image_path = sys.argv[1]
@@ -52,6 +53,7 @@ for level, (lower, upper) in color_ranges.items():
 traffic_data.sort(key=lambda x: x[0], reverse=True)
 
 # Menggambar hasil deteksi pada gambar asli
+bounding_box_points = []
 for rank, (area, contour) in enumerate(traffic_data, start=1):
     x, y, w, h = cv2.boundingRect(contour)  # Mendapatkan bounding box untuk setiap kontur
     # Menyaring fitur non-jalan berdasarkan rasio aspek (misalnya logo atau simbol yang terlalu kecil)
@@ -60,9 +62,16 @@ for rank, (area, contour) in enumerate(traffic_data, start=1):
         continue
     cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)  # Menggambar kotak di sekitar kontur
     cv2.putText(img, f"{rank}", (x, y - 10), cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 0, 0), 2)  # Menambahkan nomor peringkat
+    # Simpan koordinat sudut bounding box
+    position = (x, y, x + w, y + h)
+    bounding_box_points.append({
+        "rank": rank,
+        "position": position
+    })
 
 # Mengonversi gambar ke format RGB untuk ditampilkan dengan matplotlib
 result_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+print(json.dumps(bounding_box_points))
 
 # Membuat plot dan menyimpan hasilnya sebagai file gambar
 plt.figure(figsize=(16, 9))

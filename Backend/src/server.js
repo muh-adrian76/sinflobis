@@ -16,6 +16,7 @@ const {
   findCoordinate,
   filterGoogleMapsUrl,
   saveScreenshot,
+  extractCoordinate,
 } = require("./script/screenshoot");
 const {
   saveCriteria,
@@ -43,7 +44,10 @@ const init = async () => {
     method: "GET",
     path: "/",
     handler: (request, h) => {
-      return h.redirect("http://localhost:80/disertasi/sinflobis/frontend");
+      // return h.redirect("http://localhost:80/disertasi/sinflobis/Frontend");
+      return h.redirect(
+        "http://localhost:80/dev/Project%20data%20mining/Frontend"
+      );
     },
   });
 
@@ -207,11 +211,12 @@ const init = async () => {
 
         // Python Image Processing
         const pythonPath =
-          '"C:\\Users\\Marita Prasetyani\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"';
+          // '"C:\\Users\\Marita Prasetyani\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"';
+          '"C:\\Users\\name\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"';
         const pythonScript = path.join(__dirname, "cv.py");
         await new Promise((resolve, reject) => {
           exec(
-            `${pythonPath} ${pythonScript} ${screenshotPath}`,
+            `${pythonPath} "${pythonScript}" "${screenshotPath}"`,
             (err, stdout, stderr) => {
               if (err) {
                 console.error("Error processing image:", stderr);
@@ -223,13 +228,16 @@ const init = async () => {
           );
         });
 
+        const adjustedLongitude = parseFloat(longitude) + 0.01;
+        const koordinat = [latitude, adjustedLongitude];
         await saveScreenshot(
           timestamp,
           type,
           nama,
           newHari,
           newWaktu,
-          screenshotPath
+          screenshotPath,
+          JSON.stringify(koordinat)
         );
 
         return h
@@ -240,6 +248,7 @@ const init = async () => {
             waktu: newWaktu,
             file: fileName,
             timestamp: timestamp,
+            area: `[${latitude}, ${adjustedLongitude}]`,
           })
           .code(201);
       } catch (error) {
@@ -311,28 +320,37 @@ const init = async () => {
         }
 
         // Python Image Processing
+        const pythonPath =
+          // '"C:\\Users\\Marita Prasetyani\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"';
+          '"C:\\Users\\name\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"';
         const pythonScript = path.join(__dirname, "cv.py");
-        await new Promise((resolve, reject) => {
-          exec(
-            `python ${pythonScript} ${screenshotPath}`,
-            (err, stdout, stderr) => {
-              if (err) {
-                console.error("Error processing image:", stderr);
-                reject(new Error("Image processing failed."));
-              } else {
-                resolve();
+        const cmd = `${pythonPath} "${pythonScript}" "${screenshotPath}"`;
+
+        const boundingBoxData = await new Promise((resolve, reject) => {
+          exec(cmd, (err, stdout, stderr) => {
+            if (err) {
+              console.error("Error processing image:", stderr);
+              reject(new Error("Image processing failed."));
+            } else {
+              try {
+                const data = JSON.parse(stdout); // Parse the JSON output
+                resolve(data);
+              } catch (error) {
+                reject(new Error("Failed to parse bounding box data."));
               }
             }
-          );
+          });
         });
 
+        const koordinat = await extractCoordinate(url, boundingBoxData);
         await saveScreenshot(
           timestamp,
           type,
           newUrl,
           newHari,
           newWaktu,
-          screenshotPath
+          screenshotPath,
+          JSON.stringify(koordinat)
         );
         return h
           .response({
@@ -342,6 +360,7 @@ const init = async () => {
             waktu: newWaktu,
             file: fileName,
             timestamp: timestamp,
+            area: koordinat,
           })
           .code(201);
       } catch (error) {

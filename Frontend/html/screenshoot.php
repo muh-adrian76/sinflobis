@@ -232,7 +232,7 @@ if (isset($_POST["hapusGambar"])) {
       $('#tableBody').on('click', '.trash-btn', function() {
         const gambar = $(this).attr('href');
         const id = $(this).data('gambar');
-        console.log(`Gambar: ${gambar}, ID: ${id}`);
+        // console.log(`Gambar: ${gambar}, ID: ${id}`);
         $(".modal-title.delete").text("Konfirmasi Hapus");
         $(".modal-body.delete").html("Apakah anda yakin ingin menghapus gambar nomor <b>" + gambar + "</b> ?");
         const form = `
@@ -375,7 +375,7 @@ if (isset($_POST["hapusGambar"])) {
           //   responseType: 'blob' // Ensure binary response
           // },
           success: function(response) {
-            console.log(response);
+            // console.log(response);
             $('#preview-canvas-title h3').text(`Trafik ${response.nama}`);
             $('#preview-canvas-description h6').text(`Waktu Pengambilan Gambar: ${changeDescFormat(response.timestamp)}`);
             fetchTableData();
@@ -392,13 +392,23 @@ if (isset($_POST["hapusGambar"])) {
                 $('.loading-text').text('Tolong tunggu hingga selesai, jangan me-refresh halaman...')
               }, 1000);
             }, 2000);
-            const fileDir = `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${response.file}`;
+            const fileDir =
+              // `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${response.file}`;
+              `http://localhost/dev/Project%20data%20mining/backend/src/script/screenshots/${response.file}`;
             const imgElement = `
-              <div id="magnify">
                 <img src="${fileDir}" id="screenshot-trafik" alt="Screenshot Trafik" style="max-width: 100%; height: auto;">
-              </div>
             `;
             $('#preview-canvas').html(imgElement);
+
+            // tabel url
+            $('#tabel-url').empty();
+            const [latitude, longitude] = JSON.parse(response.area);
+
+            const locationUrl = `
+                    <a class="btn btn-sm btn-outline-warning" href="https://www.google.com/maps/@${latitude},${longitude},1500m" target="_blank">Buka Map <i class='bx bxs-right-top-arrow-circle'></i></a>`;
+
+            $('#tabel-url').append(`${locationUrl}`);
+
             $('#query').empty();
             $('#waktu').empty();
           },
@@ -471,7 +481,7 @@ if (isset($_POST["hapusGambar"])) {
           //   responseType: 'blob' // Ensure binary response
           // },
           success: function(response) {
-            console.log(response);
+            // console.log(response);
             $('#preview-canvas-manual-title h3').text(`Trafik ${response.nama}`);
             $('#preview-canvas-manual-description h6').text(`Waktu Pengambilan Gambar: ${changeDescFormat(response.timestamp)}`);
             fetchTableData();
@@ -486,17 +496,41 @@ if (isset($_POST["hapusGambar"])) {
                 $('.loading-text').text('Tolong tunggu hingga selesai, jangan me-refresh halaman...')
               }, 1000);
             }, 2000);
-            const fileDir = `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${response.file}`;
+            const fileDir =
+              // `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${response.file}`;
+              `http://localhost/dev/Project%20data%20mining/backend/src/script/screenshots/${response.file}`;
             const imgElement = `
-              <div id="magnify">
-                <img src="${fileDir}" id="screenshot-trafik" alt="Screenshot Trafik" style="max-width: 100%; height: auto;">
-              </div>`;
+                <img src="${fileDir}" id="screenshot-trafik" alt="Screenshot Trafik" style="max-width: 100%; height: auto;">`;
             $('#preview-canvas-manual').html(imgElement);
+
+            // tabel url
+            $('#tabel-url-manual').empty();
+            const tableHeader = `
+              <thead>
+                  <tr>
+                      <th>Area</th>
+                      <th>Latitude</th>
+                      <th>Longitude</th>
+                      <th>URL</th>
+                  </tr>
+              </thead>`;
+            $('#tabel-url-manual').append(tableHeader);
+
+            const tableBody = response.area.map(area => {
+              const [latitude, longitude] = area.koordinat.split(",").map(coord => coord.trim());
+              return `
+                <tr>
+                    <td>${area.rank}</td>
+                    <td>${latitude}</td>
+                    <td>${longitude}</td>
+                    <td><a class="btn btn-sm btn-outline-warning" href="https://www.google.com/maps/@${latitude},${longitude},2000m" target="_blank">Buka Map <i class='bx bxs-right-top-arrow-circle'></i></a></td>
+                </tr>`;
+            }).join('');
+
+            $('#tabel-url-manual').append(`<tbody>${tableBody}</tbody>`);
+
             $('#link').empty();
             $('#waktu_manual').empty();
-            $('#screenshot-trafik').on('load', function() {
-              magnify("screenshot-trafik", 3);
-            });
           },
           error: function(error) {
             console.error('Pesan:', error);
@@ -551,19 +585,59 @@ if (isset($_POST["hapusGambar"])) {
             gambar: id
           }),
           success: function(response) {
+            // console.log(response);
             const data = response[0];
+            const isArea = data.nama.startsWith("Koordinat");
             $('#preview-canvas-title h3').text(`Trafik ${data.nama}`);
             $('#preview-canvas-manual-title h3').text(`Trafik ${data.nama}`);
             $('#preview-canvas-description h6').text(`Waktu Pengambilan Gambar: ${changeDescFormat(data.timestamp)}`);
             $('#preview-canvas-manual-description h6').text(`Waktu Pengambilan Gambar: ${changeDescFormat(data.timestamp)}`);
             const fileName = data.url.split('\\').pop();
-            const fileDir = `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${fileName}`;
+            const fileDir =
+              // `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${fileName}`;
+              `http://localhost/dev/Project%20data%20mining/backend/src/script/screenshots/${fileName}`;
             const imgElement = `
-              <div id="magnify">
-                <img src="${fileDir}" id="screenshot-trafik" alt="Screenshot Trafik" style="max-width: 100%; height: auto;">
-              </div>`;
+                <img src="${fileDir}" id="screenshot-trafik" alt="Screenshot Trafik" style="max-width: 100%; height: auto;">`;
             $('#preview-canvas-manual').html(imgElement);
             $('#preview-canvas').html(imgElement);
+            // tabel url
+            $('#tabel-url-manual').empty();
+            $('#tabel-url').empty();
+            if (isArea) {
+              const area = JSON.parse(data.area);
+              const tableHeader = `
+                <thead>
+                    <tr>
+                        <th>Area</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>URL</th>
+                    </tr>
+                </thead>`;
+              $('#tabel-url-manual').append(tableHeader);
+              $('#tabel-url').append(tableHeader);
+
+              const tableBody = area.map((entry) => {
+                const [latitude, longitude] = entry.koordinat.split(",").map(coord => coord.trim());
+                return `
+                  <tr>
+                      <td>${entry.rank}</td>
+                      <td>${latitude}</td>
+                      <td>${longitude}</td>
+                      <td><a class="btn btn-sm btn-outline-warning" href="https://www.google.com/maps/@${latitude},${longitude},2000m" target="_blank">Buka Map <i class='bx bxs-right-top-arrow-circle'></i></a></td>
+                  </tr>`;
+              }).join('');
+
+              $('#tabel-url-manual').append(`<tbody>${tableBody}</tbody>`);
+              $('#tabel-url').append(`<tbody>${tableBody}</tbody>`);
+            } else {
+              const [latitude, longitude] = JSON.parse(data.area);
+              const locationUrl = `
+                <a class="btn btn-sm btn-outline-warning" href="https://www.google.com/maps/@${latitude},${longitude},1500m" target="_blank">Buka Map <i class='bx bxs-right-top-arrow-circle'></i></a>`;
+              $('#tabel-url-manual').append(locationUrl);
+              $('#tabel-url').append(locationUrl);
+            }
+
           },
           error: function(xhr, status, error) {
             console.error("Error fetching data gambar: ", error);
@@ -950,7 +1024,8 @@ if (isset($_POST["hapusGambar"])) {
                     </div>
                     <div class="row mb-3" id="preview-canvas"></div>
                     <div class="row text-center" id="preview-canvas-description">
-                      <h6 class="mb-0"></h6>
+                      <h6 class="mb-3"></h6>
+                      <table class="table table-hover mb-0" id="tabel-url"></table>
                     </div>
                   </div>
                 </div>
@@ -989,7 +1064,8 @@ if (isset($_POST["hapusGambar"])) {
                     </div>
                     <div class="row mb-3" id="preview-canvas-manual"></div>
                     <div class="row text-center" id="preview-canvas-manual-description">
-                      <h6 class="mb-0"></h6>
+                      <h6 class="mb-3"></h6>
+                      <table class="table table-hover mb-0" id="tabel-url-manual"></table>
                     </div>
                   </div>
                 </div>
