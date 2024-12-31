@@ -4,6 +4,8 @@ const mysql = require("mysql2/promise");
 const fs = require("fs");
 const path = require("path");
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 function newTimestamp() {
   const now = new Date();
   const year = now.getFullYear();
@@ -64,7 +66,6 @@ const takeScreenshot = async (
   );
 
   await page.setViewport({ width: 1600, height: 900 });
-  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const adjustedLongitude = parseFloat(longitude) + 0.01;
   let url;
@@ -364,6 +365,7 @@ const extractCoordinate = async (url, bbox) => {
   for (const entry of bbox) {
     const { position } = entry;
     const { centerX, centerY } = calculateCenterPosition(position);
+    await delay(5000);
     await page.mouse.move(centerX, centerY);
     await page.mouse.down({ button: "right" });
     await page.mouse.up({ button: "right" });

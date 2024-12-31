@@ -46,7 +46,7 @@ for level, (lower, upper) in color_ranges.items():
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # Mencari kontur pada mask
     for contour in contours:
         area = cv2.contourArea(contour)  # Menghitung luas area kontur
-        if area > 95:  # Menyaring area kecil agar tidak dianggap noise
+        if area > 45:  # Menyaring area kecil
             traffic_data.append((area, contour))  # Menambahkan data area dan kontur ke list traffic_data
 
 # Mengurutkan data lalu lintas berdasarkan luas area (terbesar ke terkecil)

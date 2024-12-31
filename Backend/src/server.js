@@ -211,8 +211,8 @@ const init = async () => {
 
         // Python Image Processing
         const pythonPath =
-          // '"C:\\Users\\Marita Prasetyani\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"';
-          '"C:\\Users\\name\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"';
+          '"C:\\Users\\Marita Prasetyani\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"';
+        // '"C:\\Users\\name\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"';
         const pythonScript = path.join(__dirname, "cv.py");
         await new Promise((resolve, reject) => {
           exec(
@@ -321,8 +321,8 @@ const init = async () => {
 
         // Python Image Processing
         const pythonPath =
-          // '"C:\\Users\\Marita Prasetyani\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"';
-          '"C:\\Users\\name\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"';
+          '"C:\\Users\\Marita Prasetyani\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"';
+        // '"C:\\Users\\name\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"';
         const pythonScript = path.join(__dirname, "cv.py");
         const cmd = `${pythonPath} "${pythonScript}" "${screenshotPath}"`;
 
@@ -343,6 +343,8 @@ const init = async () => {
         });
 
         const koordinat = await extractCoordinate(url, boundingBoxData);
+        // console.log(JSON.stringify(boundingBoxData), JSON.stringify(koordinat));
+
         await saveScreenshot(
           timestamp,
           type,

@@ -393,8 +393,8 @@ if (isset($_POST["hapusGambar"])) {
               }, 1000);
             }, 2000);
             const fileDir =
-              // `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${response.file}`;
-              `http://localhost/dev/Project%20data%20mining/backend/src/script/screenshots/${response.file}`;
+              `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${response.file}`;
+            // `http://localhost/dev/Project%20data%20mining/backend/src/script/screenshots/${response.file}`;
             const imgElement = `
                 <img src="${fileDir}" id="screenshot-trafik" alt="Screenshot Trafik" style="max-width: 100%; height: auto;">
             `;
@@ -419,6 +419,9 @@ if (isset($_POST["hapusGambar"])) {
             setTimeout(function() {
               $('#loading-screen').fadeOut('fast');
               document.body.style.overflow = 'auto';
+              const errorMessage = $('#toast-body');
+              errorMessage.text('Terjadi kendala pada server atau jaringan, tolong lakukan screenshot ulang!');
+              $('#showToastPlacement').click();
               setTimeout(function() {
                 statusChange('draw');
                 $('.loading-text').text('Tolong tunggu hingga selesai, jangan me-refresh halaman...')
@@ -497,8 +500,8 @@ if (isset($_POST["hapusGambar"])) {
               }, 1000);
             }, 2000);
             const fileDir =
-              // `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${response.file}`;
-              `http://localhost/dev/Project%20data%20mining/backend/src/script/screenshots/${response.file}`;
+              `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${response.file}`;
+            // `http://localhost/dev/Project%20data%20mining/backend/src/script/screenshots/${response.file}`;
             const imgElement = `
                 <img src="${fileDir}" id="screenshot-trafik" alt="Screenshot Trafik" style="max-width: 100%; height: auto;">`;
             $('#preview-canvas-manual').html(imgElement);
@@ -539,6 +542,9 @@ if (isset($_POST["hapusGambar"])) {
             setTimeout(function() {
               $('#loading-screen').fadeOut('fast');
               document.body.style.overflow = 'auto';
+              const errorMessage = $('#toast-body');
+              errorMessage.text('Terjadi kendala pada server atau jaringan, tolong lakukan screenshot ulang!');
+              $('#showToastPlacement').click();
               setTimeout(function() {
                 statusChange('draw');
                 $('.loading-text').text('Tolong tunggu hingga selesai, jangan me-refresh halaman...')
@@ -594,8 +600,8 @@ if (isset($_POST["hapusGambar"])) {
             $('#preview-canvas-manual-description h6').text(`Waktu Pengambilan Gambar: ${changeDescFormat(data.timestamp)}`);
             const fileName = data.url.split('\\').pop();
             const fileDir =
-              // `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${fileName}`;
-              `http://localhost/dev/Project%20data%20mining/backend/src/script/screenshots/${fileName}`;
+              `http://localhost/disertasi/sinflobis/backend/src/script/screenshots/${fileName}`;
+            // `http://localhost/dev/Project%20data%20mining/backend/src/script/screenshots/${fileName}`;
             const imgElement = `
                 <img src="${fileDir}" id="screenshot-trafik" alt="Screenshot Trafik" style="max-width: 100%; height: auto;">`;
             $('#preview-canvas-manual').html(imgElement);
